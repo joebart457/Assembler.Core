@@ -1,0 +1,32 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <Title>Assembler.Core</Title>
+    <Version>0.1.0</Version>
+    <Company>JimmyDev</Company>
+    <Description>A core package for interacting with X86 Assembly code.</Description>
+    <PackageProjectUrl>https://github.com/joebart457/Assembler.Core</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/joebart457/Assembler.Core</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>X86;Assembly;</PackageTags>
+    <PackageIcon>x86.png</PackageIcon>
+    <PackageReadmeFile>readme.md</PackageReadmeFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="Assets\readme.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+    <None Include="Assets\x86.png">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
+
+</Project>
