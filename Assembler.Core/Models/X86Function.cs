@@ -23,9 +23,10 @@ public class X86Function
         ExportedSymbol = exportedSymbol;
     }
 
-    public void AddInstruction(X86Instruction instruction)
+    public Ty AddInstruction<Ty>(Ty instruction) where Ty: X86Instruction
     {
         Instructions.Add(instruction);
+        return instruction; // to allow chaining in the future
     }
 
     public string Emit(int indentLevel)

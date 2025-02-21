@@ -1,31 +1,26 @@
 ﻿using Assembler.Core.Constants;
 using Assembler.Core.Extensions;
-using Assembler.Core.Models;
 using System.Text;
 
 namespace Assembler.Core;
 
 public static class X86AssemblyGenerator
 {
-    public static string? OutputToFile(X86AssemblyContext assemblyContext, AssemblerOptions assemblerOptions)
+    public static string? OutputToFile(X86AssemblyContext assemblyContext, string assemblyOutputPath)
     {
-        SantizeAssemblyFilePath(assemblerOptions);
-        SantizeOutputFilePath(assemblyContext.OutputTarget, assemblerOptions);
-        var errorMessage = OutputX86Assembly(assemblyContext, assemblerOptions, out var generatedCode);
+        var errorMessage = OutputX86Assembly(assemblyContext, out var generatedCode);
         if (errorMessage != null) return errorMessage;
-        File.WriteAllText(assemblerOptions.AssemblyFilePath, generatedCode.ToString());
+        File.WriteAllText(assemblyOutputPath, generatedCode.ToString());
         return null;
     }
 
-    public static string? OutputToMemory(X86AssemblyContext assemblyContext, AssemblerOptions assemblerOptions, out StringBuilder generatedX86Code)
+    public static string? OutputToMemory(X86AssemblyContext assemblyContext, out StringBuilder generatedX86Code)
     {
-        SantizeAssemblyFilePath(assemblerOptions);
-        SantizeOutputFilePath(assemblyContext.OutputTarget, assemblerOptions);
-        var errorMessage = OutputX86Assembly(assemblyContext, assemblerOptions, out generatedX86Code);
+        var errorMessage = OutputX86Assembly(assemblyContext, out generatedX86Code);
         return errorMessage;
     }
 
-    private static string? OutputX86Assembly(X86AssemblyContext assemblyContext, AssemblerOptions assemblerOptions, out StringBuilder generatedX86Code)
+    private static string? OutputX86Assembly(X86AssemblyContext assemblyContext, out StringBuilder generatedX86Code)
     {
         var sb = new StringBuilder();
 
@@ -166,7 +161,7 @@ public static class X86AssemblyGenerator
             }
 
             exportedNamesCounter = 0;
-            sb.AppendLine($"!lib_name db '{Path.GetFileName(assemblerOptions.ExecutableFilePath)}',0".Indent(1));
+            sb.AppendLine($"!lib_name db '{Path.GetFileName(assemblyContext.GetExportFileName())}',0".Indent(1));
             foreach (var exportedFunction in assemblyContext.ExportedFunctions)
             {
                 sb.AppendLine($"!exported_{exportedNamesCounter} db '{exportedFunction.exportedSymbol}',0".Indent(1));
@@ -217,25 +212,4 @@ public static class X86AssemblyGenerator
         generatedX86Code = sb;
         return null; // return null since there are no errors
     }
-
-    private static void SantizeAssemblyFilePath(AssemblerOptions options)
-    {
-        if (string.IsNullOrWhiteSpace(options.AssemblyFilePath))
-        {
-            options.AssemblyFilePath = Path.ChangeExtension(Path.GetTempFileName(), ".asm");
-            return;
-        }
-        options.AssemblyFilePath = Path.GetFullPath(options.AssemblyFilePath);
-        if (Path.GetExtension(options.AssemblyFilePath) != ".asm") options.AssemblyFilePath = $"{options.AssemblyFilePath}.asm";
-    }
-
-    private static void SantizeOutputFilePath(OutputTarget outputTarget, AssemblerOptions options)
-    {
-        if (string.IsNullOrEmpty(options.ExecutableFilePath)) options.ExecutableFilePath = Path.GetFullPath(Path.GetFileNameWithoutExtension(options.AssemblyFilePath));
-        var outputPath = Path.GetFullPath(options.ExecutableFilePath);
-        if (outputTarget == OutputTarget.Exe && Path.GetExtension(outputPath) != ".exe") outputPath = $"{outputPath}.exe";
-        if (outputTarget == OutputTarget.Dll && Path.GetExtension(outputPath) != ".dll") outputPath = $"{outputPath}.dll";
-        options.ExecutableFilePath = outputPath;
-    }
-
 }

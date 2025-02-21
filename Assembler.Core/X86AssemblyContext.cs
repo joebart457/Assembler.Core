@@ -1,6 +1,10 @@
 ﻿using Assembler.Core.Constants;
 using Assembler.Core.Extensions;
+using Assembler.Core.Instructions;
 using Assembler.Core.Models;
+using Language.Experimental.Compiler.Instructions;
+using System.Data.SqlTypes;
+using System.Runtime.InteropServices;
 using System.Text;
 
 
@@ -10,6 +14,7 @@ public class X86AssemblyContext
 {
     private X86Function? _currentFunctionTarget;
     private int _uniqueLabelIndex = 0;
+    private string? _exportFileName;
 
     private Stack<(string continueLabel, string breakLabel)> _loopLabels = new Stack<(string continueLabel, string breakLabel)>();
     private List<StringData> _stringData = new();
@@ -31,32 +36,48 @@ public class X86AssemblyContext
     public OutputTarget OutputTarget { get; set; }
     public X86Function? EntryPoint { get; set; }
     public X86Function GetEntryPoint() => EntryPoint ?? throw new InvalidOperationException("entry point has not been defined");
+    public string GetExportFileName() => _exportFileName ?? throw new InvalidOperationException("export filepath was not defined");
+    public string? OutputToFile(string outputFilePath) => X86AssemblyGenerator.OutputToFile(this, outputFilePath);
+    public string? OutputToMemory(out StringBuilder generatedX86Code) => X86AssemblyGenerator.OutputToMemory(this, out generatedX86Code);
     public void SetOutputTarget(OutputTarget target)
     {
         OutputTarget = target;
     }
 
-    public void SetEntryPoint(X86Function function)
+    /// <summary>
+    /// Sets the name of the resulting dll.
+    /// Used only when OutputTarget == OutputTarget.Dll and at least one exported function.
+    /// </summary>
+    /// <param name="filePath"></param>
+    public void SetExportFileName(string fileName)
+    {
+        _exportFileName = fileName;
+    }
+
+    public X86Function SetEntryPoint(X86Function function)
     {
         EntryPoint = function;
+        return function;
     }
 
     public X86Function SetEntryPoint(string name)
     {
         var foundFunction  = FunctionData.Find(x => x.FunctionLabel == name || x.GetDecoratedFunctionLabel() == name);
         if (foundFunction == null) throw new InvalidOperationException($"function corresponding to entry point {name} has not been defined");
-        return foundFunction;
+
+        return SetEntryPoint(foundFunction);
     }
 
     public List<(string functionIdentifier, string exportedSymbol)> ExportedFunctions => FunctionData.Where(x => x.IsExported)
         .OrderBy(x => x.ExportedSymbol, StringComparer.Ordinal) // Must be exported in ordinal order
         .Select(x => (x.GetDecoratedFunctionLabel(), x.ExportedSymbol))
         .ToList();
-    public void AddImportedFunction(ImportedFunction importedFunction)
+    public ImportedFunction AddImportedFunction(ImportedFunction importedFunction)
     {
         var foundLibrary = ImportLibraries.Find(x => x.LibraryAlias == importedFunction.LibraryAlias);
         if (foundLibrary == null) throw new Exception($"import library with alias {importedFunction.LibraryAlias} is not defined");
         foundLibrary.AddImportedFunction(importedFunction);
+        return importedFunction;
     }
 
     public void AddImportLibrary(ImportLibrary library)
@@ -144,13 +165,18 @@ public class X86AssemblyContext
     {
         if (_currentFunctionTarget != null) throw new InvalidOperationException();
         _currentFunctionTarget = function;
+        FunctionData.Add(_currentFunctionTarget);
     }
 
     public void ExitFunction()
     {
         if (_currentFunctionTarget == null) throw new InvalidOperationException();
-        FunctionData.Add(_currentFunctionTarget);
         _currentFunctionTarget = null;
+    }
+
+    public void DiscardFunction()
+    {
+        FunctionData.Remove(CurrentFunction);
     }
 
     public X86Function CurrentFunction => _currentFunctionTarget ?? throw new InvalidOperationException("CurrentFunction was null");
@@ -196,20 +222,175 @@ public class X86AssemblyContext
         ProgramIcon = new IconData(iconFilePath);
     }
 
+
+    #region Instructions
+
+    public void SetupStackFrame()
+    {
+        Push(X86Register.ebp);
+        Mov(X86Register.ebp, X86Register.esp);
+        if (CurrentFunction.Parameters.Any())
+            Sub(X86Register.esp, CurrentFunction.Parameters.Sum(x => x.StackSize));
+    }
+
+    public void TeardownStackFrame()
+    {
+        Mov(X86Register.esp, X86Register.ebp);
+        Pop(X86Register.ebp);
+    }
+
+    public void Return()
+    {
+        if (CurrentFunction.CallingConvention == CallingConvention.StdCall)
+            Ret(CurrentFunction.Parameters.Sum(x => x.StackSize));
+        else if (CurrentFunction.CallingConvention == CallingConvention.Cdecl)
+            Ret();
+        else throw new NotImplementedException($"calling convention {CurrentFunction.CallingConvention} has not been implemented");
+    }
+
+    public void CallImportedFunction(string functionIdentifier)
+    {
+        var foundFunction = ImportLibraries.SelectMany(x => x.ImportedFunctions).FirstOrDefault(x => x.FunctionIdentifier == functionIdentifier);
+        if (foundFunction == null) throw new InvalidOperationException($"definition for imported function {functionIdentifier} was not provided");
+        CallImportedFunction(foundFunction);
+    }
+
+    public void CallImportedFunction(ImportedFunction importedFunction)
+    {
+        Call(importedFunction.FunctionIdentifier, true);
+        if (importedFunction.CallingConvention == CallingConvention.StdCall)
+            Ret(importedFunction.Parameters.Sum(x => x.StackSize));
+        else if (importedFunction.CallingConvention == CallingConvention.Cdecl)
+            Ret();
+        else throw new NotImplementedException($"calling convention {importedFunction.CallingConvention} has not been implemented");
+    }
+
+    public Cdq Cdq() => CurrentFunction.AddInstruction(new Cdq());
+
+    public  Push_Register Push(X86Register register) => CurrentFunction.AddInstruction(new Push_Register(register));
+    public  Push_Offset Push(RegisterOffset offset) => CurrentFunction.AddInstruction(new Push_Offset(offset));
+    public  Push_Address Push(string address) => CurrentFunction.AddInstruction(new Push_Address(address));
+    public  Push_Immediate<int> Push(int immediateValue) => CurrentFunction.AddInstruction(new Push_Immediate<int>(immediateValue));
+    public Push_Immediate<float> Push(float immediateValue) => CurrentFunction.AddInstruction(new Push_Immediate<float>(immediateValue));
+    public  Push_SymbolOffset Push(SymbolOffset offset) => CurrentFunction.AddInstruction(new Push_SymbolOffset(offset));
+
+    public  Lea_Register_Offset Lea(X86Register destination, RegisterOffset source) => CurrentFunction.AddInstruction(new Lea_Register_Offset(destination, source));
+    public  Lea_Register_SymbolOffset Lea(X86Register destination, SymbolOffset source) => CurrentFunction.AddInstruction(new Lea_Register_SymbolOffset(destination, source));
+
+    public  Mov_Register_Offset Mov(X86Register destination, RegisterOffset source) => CurrentFunction.AddInstruction(new Mov_Register_Offset(destination, source));
+    public  Mov_Offset_Register Mov(RegisterOffset destination, X86Register source) => CurrentFunction.AddInstruction(new Mov_Offset_Register(destination, source));
+    public  Mov_Offset_Immediate Mov(RegisterOffset destination, int immediate) => CurrentFunction.AddInstruction(new Mov_Offset_Immediate(destination, immediate));
+    public  Mov_Register_Register Mov(X86Register destination, X86Register source) => CurrentFunction.AddInstruction(new Mov_Register_Register(destination, source));
+    public  Mov_Register_Immediate Mov(X86Register destination, int immediate) => CurrentFunction.AddInstruction(new Mov_Register_Immediate(destination, immediate));
+
+    public  Mov_SymbolOffset_Register Mov(SymbolOffset destination, X86Register source) => CurrentFunction.AddInstruction(new Mov_SymbolOffset_Register(destination, source));
+    public  Mov_SymbolOffset_Register__Byte Mov(SymbolOffset destination, X86ByteRegister source) => CurrentFunction.AddInstruction(new Mov_SymbolOffset_Register__Byte(destination, source));
+    public  Mov_SymbolOffset_Immediate Mov(SymbolOffset destination, int immediateValue) => CurrentFunction.AddInstruction(new Mov_SymbolOffset_Immediate(destination, immediateValue));
+
+    public  Mov_SymbolOffset_Byte_Register__Byte Mov(SymbolOffset_Byte destination, X86ByteRegister source) => CurrentFunction.AddInstruction(new Mov_SymbolOffset_Byte_Register__Byte(destination, source));
+    public  Mov_RegisterOffset_Byte_Register__Byte Mov(RegisterOffset_Byte destination, X86ByteRegister source) => CurrentFunction.AddInstruction(new Mov_RegisterOffset_Byte_Register__Byte(destination, source));
+
+    public  Mov_Offset_Register__Byte Mov(RegisterOffset destination, X86ByteRegister source) => CurrentFunction.AddInstruction(new Mov_Offset_Register__Byte(destination, source));
+    public  Movsx_Register_Offset Movsx(X86Register destination, RegisterOffset_Byte source) => CurrentFunction.AddInstruction(new Movsx_Register_Offset(destination, source));
+    public  Movsx_Register_SymbolOffset__Byte Movsx(X86Register destination, SymbolOffset_Byte source) => CurrentFunction.AddInstruction(new Movsx_Register_SymbolOffset__Byte(destination, source));
+
+    public  Sub_Register_Immediate Sub(X86Register destination, int valueToSubtract) => CurrentFunction.AddInstruction(new Sub_Register_Immediate(destination, valueToSubtract));
+    public  Sub_Register_Register Sub(X86Register destination, X86Register source) => CurrentFunction.AddInstruction(new Sub_Register_Register(destination, source));
+
+    public  Add_Register_Immediate Add(X86Register destination, int value) => CurrentFunction.AddInstruction(new Add_Register_Immediate(destination, value));
+    public  Add_Register_Register Add(X86Register destination, X86Register source) => CurrentFunction.AddInstruction(new Add_Register_Register(destination, source));
+
+
+    public  And_Register_Register And(X86Register destination, X86Register source) => CurrentFunction.AddInstruction(new And_Register_Register(destination, source));
+    public  Or_Register_Register Or(X86Register destination, X86Register source) => CurrentFunction.AddInstruction(new Or_Register_Register(destination, source));
+    public  Xor_Register_Register Xor(X86Register destination, X86Register source) => CurrentFunction.AddInstruction(new Xor_Register_Register(destination, source));
+
+
+    public  Pop_Register Pop(X86Register destination) => CurrentFunction.AddInstruction(new Pop_Register(destination));
+
+    public  Neg_Offset Neg(RegisterOffset destination) => CurrentFunction.AddInstruction(new Neg_Offset(destination));
+    public  Not_Offset Not(RegisterOffset destination) => CurrentFunction.AddInstruction(new Not_Offset(destination));
+
+    public  Inc_Register Inc(X86Register destination) => CurrentFunction.AddInstruction(new Inc_Register(destination));
+    public  Dec_Register Dec(X86Register destination) => CurrentFunction.AddInstruction(new Dec_Register(destination));
+    public  Inc_Offset Inc(RegisterOffset destination) => CurrentFunction.AddInstruction(new Inc_Offset(destination));
+    public  Dec_Offset Dec(RegisterOffset destination) => CurrentFunction.AddInstruction(new Dec_Offset(destination));
+
+    public  IDiv_Offset IDiv(RegisterOffset divisor) => CurrentFunction.AddInstruction(new IDiv_Offset(divisor));
+    public  IMul_Register_Register IMul(X86Register destination, X86Register source) => CurrentFunction.AddInstruction(new IMul_Register_Register(destination, source));
+    public  IMul_Register_Immediate IMul(X86Register destination, int immediate) => CurrentFunction.AddInstruction(new IMul_Register_Immediate(destination, immediate));
+    public  Add_Register_Offset Add(X86Register destination, RegisterOffset source) => CurrentFunction.AddInstruction(new Add_Register_Offset(destination, source));
+
+
+    public  Jmp Jmp(string label) => CurrentFunction.AddInstruction(new Jmp(label));
+    public  JmpGt JmpGt(string label) => CurrentFunction.AddInstruction(new JmpGt(label));
+    public  JmpGte JmpGte(string label) => CurrentFunction.AddInstruction(new JmpGte(label));
+    public  JmpLt JmpLt(string label) => CurrentFunction.AddInstruction(new JmpLt(label));
+    public  JmpLte JmpLte(string label) => CurrentFunction.AddInstruction(new JmpLte(label));
+    public  JmpEq JmpEq(string label) => CurrentFunction.AddInstruction(new JmpEq(label));
+    public  JmpNeq JmpNeq(string label) => CurrentFunction.AddInstruction(new JmpNeq(label));
+    public  Jz Jz(string label) => CurrentFunction.AddInstruction(new Jz(label));
+    public  Jnz Jnz(string label) => CurrentFunction.AddInstruction(new Jnz(label));
+    public  Js Js(string label) => CurrentFunction.AddInstruction(new Js(label));
+    public  Jns Jns(string label) => CurrentFunction.AddInstruction(new Jns(label));
+    public  Ja Ja(string label) => CurrentFunction.AddInstruction(new Ja(label));
+    public  Jae Jae(string label) => CurrentFunction.AddInstruction(new Jae(label));
+    public  Jb Jb(string label) => CurrentFunction.AddInstruction(new Jb(label));
+    public  Jbe Jbe(string label) => CurrentFunction.AddInstruction(new Jbe(label));
+
+    public  Test_Register_Register Test(X86Register operand1, X86Register operand2) => CurrentFunction.AddInstruction(new Test_Register_Register(operand1, operand2));
+    public  Test_Register_Offset Test(X86Register operand1, RegisterOffset operand2) => CurrentFunction.AddInstruction(new Test_Register_Offset(operand1, operand2));
+    public  Cmp_Register_Register Cmp(X86Register operand1, X86Register operand2) => CurrentFunction.AddInstruction(new Cmp_Register_Register(operand1, operand2));
+    public  Cmp_Register_Immediate Cmp(X86Register operand1, int operand2) => CurrentFunction.AddInstruction(new Cmp_Register_Immediate(operand1, operand2));
+    public  Cmp_Byte_Byte Cmp(X86ByteRegister operand1, X86ByteRegister operand2) => CurrentFunction.AddInstruction(new Cmp_Byte_Byte(operand1, operand2));
+
+    public  Call Call(string callee, bool isIndirect) => CurrentFunction.AddInstruction(new Call(callee, isIndirect));
+    public  Call_RegisterOffset Call(RegisterOffset offset) => CurrentFunction.AddInstruction(new Call_RegisterOffset(offset));
+    public  Call_Register Call(X86Register register) => CurrentFunction.AddInstruction(new Call_Register(register));
+    public  Label Label(string text) => CurrentFunction.AddInstruction(new Label(text));
+    public  Ret Ret() => CurrentFunction.AddInstruction(new Ret());
+    public  Ret_Immediate Ret(int immediate) => CurrentFunction.AddInstruction(new Ret_Immediate(immediate));
+
+    public  Fstp_Offset Fstp(RegisterOffset destination) => CurrentFunction.AddInstruction(new Fstp_Offset(destination));
+    public  Fld_Offset Fld(RegisterOffset source) => CurrentFunction.AddInstruction(new Fld_Offset(source));
+
+    public  Movss_Offset_Register Movss(RegisterOffset destination, XmmRegister source) => CurrentFunction.AddInstruction(new Movss_Offset_Register(destination, source));
+    public  Movss_Register_Offset Movss(XmmRegister destination, RegisterOffset source) => CurrentFunction.AddInstruction(new Movss_Register_Offset(destination, source));
+    public  Movss_Register_Register Movss(XmmRegister destination, XmmRegister source) => CurrentFunction.AddInstruction(new Movss_Register_Register(destination, source));
+    public  Comiss_Register_Offset Comiss(XmmRegister destination, RegisterOffset source) => CurrentFunction.AddInstruction(new Comiss_Register_Offset(destination, source));
+    public  Comiss_Register_Register Comiss(XmmRegister destination, XmmRegister source) => CurrentFunction.AddInstruction(new Comiss_Register_Register(destination, source));
+    public  Ucomiss_Register_Register Ucomiss(XmmRegister destination, XmmRegister source) => CurrentFunction.AddInstruction(new Ucomiss_Register_Register(destination, source));
+    public  Addss_Register_Offset Addss(XmmRegister destination, RegisterOffset source) => CurrentFunction.AddInstruction(new Addss_Register_Offset(destination, source));
+    public  Subss_Register_Offset Subss(XmmRegister destination, RegisterOffset source) => CurrentFunction.AddInstruction(new Subss_Register_Offset(destination, source));
+    public  Mulss_Register_Offset Mulss(XmmRegister destination, RegisterOffset source) => CurrentFunction.AddInstruction(new Mulss_Register_Offset(destination, source));
+    public  Divss_Register_Offset Divss(XmmRegister destination, RegisterOffset source) => CurrentFunction.AddInstruction(new Divss_Register_Offset(destination, source));
+    public  Cvtsi2ss_Register_Offset Cvtsi2ss(XmmRegister destination, RegisterOffset source) => CurrentFunction.AddInstruction(new Cvtsi2ss_Register_Offset(destination, source));
+    public  Cvtss2si_Register_Offset Cvtss2si(X86Register destination, RegisterOffset source) => CurrentFunction.AddInstruction(new Cvtss2si_Register_Offset(destination, source));
+
+
+
+    #endregion
+
+
     #region DataDefinitions
 
     public class ImportedFunction
-    { 
+    {
+        public CallingConvention CallingConvention { get; set; }
         public string LibraryAlias { get; set; }
         public string Symbol { get; set; } // The symbol to import 
         public string FunctionIdentifier { get; set; } // the alias to be used to reference the imported symbol
-        public ImportedFunction(string libraryAlias, string symbol, string functionIdentifier)
+        public List<X86FunctionLocalData> Parameters { get; set; }
+        public ImportedFunction(CallingConvention callingConvention, string libraryAlias, string symbol, string functionIdentifier, List<X86FunctionLocalData> parameters)
         {
+            CallingConvention = callingConvention;
             LibraryAlias = libraryAlias;
             Symbol = symbol;
             FunctionIdentifier = functionIdentifier;
+            Parameters = parameters;
         }
     }
+
     public class ImportLibrary
     {
         public string LibraryPath { get; set; }
@@ -241,15 +422,25 @@ public class X86AssemblyContext
 
         public string Emit(int indentLevel)
         {
-            return $"{Label} db {EscapeString(Value)},0".Indent(indentLevel);
+            return $"{Label} db {EscapeString(Value, indentLevel + 1)}".Indent(indentLevel);
         }
 
-        private static string EscapeString(string value)
+        private static string EscapeString(string value, int indentLevel)
         {
-            if (value.Length == 0) return "0";
+            if (value.Length == 0) return "0x00";
             var bytes = Encoding.UTF8.GetBytes(value);
-            var strBytes = BitConverter.ToString(bytes);
-            return $"0x{strBytes.Replace("-", ",0x")}";
+            if (bytes.Length <= 10) 
+                return $"0x{BitConverter.ToString(bytes).Replace("-", ",0x")},0x00";
+            var byteChunks = bytes.Chunk(10).ToList();
+            var sb = new StringBuilder();
+            foreach(var chunk in byteChunks)
+            {
+                var strBytes = BitConverter.ToString(chunk);
+                if (chunk == byteChunks.First()) sb.AppendLine($"0x{strBytes.Replace("-", ",0x")}");    // no indent
+                if (chunk == byteChunks.Last()) sb.AppendLine($"0x{strBytes.Replace("-", ",0x")},0x00".Indent(indentLevel)); // null terminated
+                sb.AppendLine($"0x{strBytes.Replace("-", ",0x")}".Indent(indentLevel));
+            }
+            return sb.ToString();
         }
     }
 
