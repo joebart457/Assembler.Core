@@ -7,7 +7,7 @@
     <Nullable>enable</Nullable>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <Title>Assembler.Core</Title>
-    <Version>0.1.0</Version>
+    <Version>0.1.2</Version>
     <Company>JimmyDev</Company>
     <Description>A core package for interacting with X86 Assembly code.</Description>
     <PackageProjectUrl>https://github.com/joebart457/Assembler.Core</PackageProjectUrl>
