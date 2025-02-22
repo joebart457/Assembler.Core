@@ -1,7 +1,7 @@
 ﻿using Assembler.Core.Constants;
 using Assembler.Core.Models;
 
-namespace Language.Experimental.Compiler.Instructions
+namespace Assembler.Core.Instructions
 {
     public class IMul_Register_Register : X86Instruction
     {

@@ -1,7 +1,7 @@
 ﻿using Assembler.Core.Constants;
 using Assembler.Core.Models;
 
-namespace Language.Experimental.Compiler.Instructions
+namespace Assembler.Core.Instructions
 {
     public class Mov_Offset_Register__Byte : X86Instruction
     {

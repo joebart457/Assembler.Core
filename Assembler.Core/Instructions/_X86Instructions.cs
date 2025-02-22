@@ -1,6 +1,5 @@
 ﻿using Assembler.Core.Constants;
 using Assembler.Core.Models;
-using Language.Experimental.Compiler.Instructions;
 
 namespace Assembler.Core.Instructions;
 public static class X86Instructions

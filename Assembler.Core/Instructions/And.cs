@@ -2,7 +2,7 @@
 using Assembler.Core.Models;
 
 
-namespace Language.Experimental.Compiler.Instructions
+namespace Assembler.Core.Instructions
 {
     public class And_Register_Register : X86Instruction
     {
