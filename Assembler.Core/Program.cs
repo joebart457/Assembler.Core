@@ -81,6 +81,6 @@ internal class Program
 
 
         var assembledBytes = peFile.AssembleProgram("main");
-        File.WriteAllBytes("second.exe", assembledBytes);
+        File.WriteAllBytes("third.exe", assembledBytes);
     }
 }

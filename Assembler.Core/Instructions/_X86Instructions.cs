@@ -5,19 +5,12 @@ namespace Assembler.Core.Instructions;
 public static class X86Instructions
 {
     public static Cdq Cdq() => new Cdq();
-
     public static Push_Register Push(X86Register register) => new Push_Register(register);
     public static Push_RegisterOffset Push(RegisterOffset offset) => new Push_RegisterOffset(offset);
     public static Push_Address Push(string address) => new Push_Address(address);
     public static Push_Immediate Push(int immediateValue) => new Push_Immediate(immediateValue);
     public static Push_SymbolOffset Push(SymbolOffset offset) => new Push_SymbolOffset(offset);
 
-    public static X86Instruction Lea(X86Register destination, IOffset source)
-    {
-        if (source is RegisterOffset registerOffset) return Lea(destination, registerOffset);
-        else if (source is SymbolOffset symbolOffset) return Lea(destination, symbolOffset);
-        else throw new InvalidOperationException();
-    }
     public static Lea_Register_RegisterOffset Lea(X86Register destination, RegisterOffset source) => new Lea_Register_RegisterOffset(destination, source);
     public static Lea_Register_SymbolOffset Lea(X86Register destination, SymbolOffset source) => new Lea_Register_SymbolOffset(destination, source);
 

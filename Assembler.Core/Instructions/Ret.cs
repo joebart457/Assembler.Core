@@ -36,8 +36,8 @@ namespace Assembler.Core.Instructions
             return $"ret {ImmediateValue}";
         }
 
-        public override uint GetSizeOnDisk() => ;
-        public override uint GetVirtualSize() => 1;
+        public override uint GetSizeOnDisk() => 3;
+        public override uint GetVirtualSize() => 3;
 
         public override byte[] Assemble(Section section, uint absoluteInstructionPointer, Dictionary<string, Address> resolvedLabels)
         {

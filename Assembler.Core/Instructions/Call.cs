@@ -31,7 +31,8 @@ namespace Assembler.Core.Instructions
             if (IsIndirect)
             {
                 byte opCode = 0xFF;
-                byte modRM = Mod.MemoryModeNoDisplacement.ApplyOperand1(X86Register.ecx).ApplyOperand2(X86Register.ebp);
+                // in this case edx is 010 which is the opcode extension 2
+                byte modRM = Mod.MemoryModeNoDisplacement.ApplyOperand1(X86Register.edx).ApplyOperand2(X86Register.ebp);
                 List<byte> bytes = [opCode, modRM];                
                 bytes.AddRange(BitConverter.GetBytes(address.VirtualAddress));
                 return bytes.ToArray();

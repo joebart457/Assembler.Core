@@ -1,10 +1,5 @@
 ﻿using Assembler.Core.Models;
 using Assembler.Core.PortableExecutable;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Assembler.Core.Instructions;
 
@@ -29,7 +24,7 @@ public class DefineDoubleWord : X86Instruction
 
     public override string Emit()
     {
-        throw new NotImplementedException();
+        return $"dd {string.Join(", ", DoubleWords.Select(x => x.ToString()))}";
     }
 
     public override byte[] Assemble(Section section, uint absoluteInstructionPointer, Dictionary<string, Address> resolvedLabels)
@@ -57,7 +52,7 @@ public class DefineDoubleWord_Rva : X86Instruction
 
     public override string Emit()
     {
-        throw new NotImplementedException();
+        return $"dd {Rva}";
     }
 
     public override byte[] Assemble(Section section, uint absoluteInstructionPointer, Dictionary<string, Address> resolvedLabels)
@@ -81,7 +76,7 @@ public class DefineDoubleWord_Address : X86Instruction
 
     public override string Emit()
     {
-        throw new NotImplementedException();
+        return $"dd {Symbol}";
     }
 
     public override byte[] Assemble(Section section, uint absoluteInstructionPointer, Dictionary<string, Address> resolvedLabels)
