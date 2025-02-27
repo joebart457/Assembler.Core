@@ -33,7 +33,6 @@ namespace Assembler.Core.Models
             return Register.GetHashCode();
         }
 
-        public IOffset ToByteOffset() => new RegisterOffset_Byte(Register, Offset);
 
         public byte[] EncodeAsRM(X86Register reg)
         {

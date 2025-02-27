@@ -46,4 +46,5 @@ internal static class ByteArrayExtensions
     {
         return [opCode, 0b00100100];
     }
+
 }

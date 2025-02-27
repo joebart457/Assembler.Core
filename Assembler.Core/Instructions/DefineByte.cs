@@ -43,7 +43,7 @@ public class DefineByte: X86Instruction
     {
         return (uint)DefinedBytes.Length;
     }
-    public override byte[] Assemble(Section section, Dictionary<string, Address> resolvedLabels)
+    public override byte[] Assemble(Section section, uint absoluteInstructionPointer, Dictionary<string, Address> resolvedLabels)
     {
         return DefinedBytes;
     }
@@ -82,7 +82,7 @@ internal class PadByte : X86Instruction
         return (uint)DefinedBytes.Length;
     }
 
-    public override byte[] Assemble(Section section, Dictionary<string, Address> resolvedLabels)
+    public override byte[] Assemble(Section section, uint absoluteInstructionPointer, Dictionary<string, Address> resolvedLabels)
     {
         return DefinedBytes;
     }

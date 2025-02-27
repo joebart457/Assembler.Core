@@ -19,7 +19,7 @@ namespace Assembler.Core.Instructions
             return $"pop {Destination}";
         }
 
-        public override byte[] Assemble(Section section, Dictionary<string, Address> resolvedLabels)
+        public override byte[] Assemble(Section section, uint absoluteInstructionPointer, Dictionary<string, Address> resolvedLabels)
         {
             byte opCode = 0x58;
             return [opCode.ApplyRegister(Destination)];

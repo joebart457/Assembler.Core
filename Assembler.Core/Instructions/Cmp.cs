@@ -21,7 +21,7 @@ namespace Assembler.Core.Instructions
             return $"cmp {Destination}, {Source}";
         }
 
-        public override byte[] Assemble(Section section, Dictionary<string, Address> resolvedLabels)
+        public override byte[] Assemble(Section section, uint absoluteInstructionPointer, Dictionary<string, Address> resolvedLabels)
         {
             byte opCode = 0x39;
             var modRM = Mod.RegisterDirect.ApplyOperand1(Source).ApplyOperand2(Destination);
@@ -46,7 +46,7 @@ namespace Assembler.Core.Instructions
         {
             return $"cmp {Destination}, {Source}";
         }
-        public override byte[] Assemble(Section section, Dictionary<string, Address> resolvedLabels)
+        public override byte[] Assemble(Section section, uint absoluteInstructionPointer, Dictionary<string, Address> resolvedLabels)
         {
             byte opCode = 0x38;
             var modRM = Mod.RegisterDirect.ApplyOperand1(Source).ApplyOperand2(Destination);
@@ -72,7 +72,7 @@ namespace Assembler.Core.Instructions
             return $"cmp {Destination}, {Source}";
         }
 
-        public override byte[] Assemble(Section section, Dictionary<string, Address> resolvedLabels)
+        public override byte[] Assemble(Section section, uint absoluteInstructionPointer, Dictionary<string, Address> resolvedLabels)
         {
             byte opCode = 0x81;
             // here edi as operand1 is 111 the opcode extension for cmp

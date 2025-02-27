@@ -16,7 +16,7 @@ namespace Assembler.Core.Instructions
         public override uint GetSizeOnDisk() => 1;
         public override uint GetVirtualSize() => 1;
 
-        public override byte[] Assemble(Section section, Dictionary<string, Address> resolvedLabels)
+        public override byte[] Assemble(Section section, uint absoluteInstructionPointer, Dictionary<string, Address> resolvedLabels)
         {
             return [0xC3];
         }
@@ -24,9 +24,9 @@ namespace Assembler.Core.Instructions
 
     public class Ret_Immediate : X86Instruction
     {
-        public int ImmediateValue { get; set; }
+        public ushort ImmediateValue { get; set; }
 
-        public Ret_Immediate(int immediateValue)
+        public Ret_Immediate(ushort immediateValue)
         {
             ImmediateValue = immediateValue;
         }
@@ -36,10 +36,10 @@ namespace Assembler.Core.Instructions
             return $"ret {ImmediateValue}";
         }
 
-        public override uint GetSizeOnDisk() => 1;
+        public override uint GetSizeOnDisk() => ;
         public override uint GetVirtualSize() => 1;
 
-        public override byte[] Assemble(Section section, Dictionary<string, Address> resolvedLabels)
+        public override byte[] Assemble(Section section, uint absoluteInstructionPointer, Dictionary<string, Address> resolvedLabels)
         {
             byte opCode = 0xC2;
             return opCode.Encode(ImmediateValue.ToBytes());

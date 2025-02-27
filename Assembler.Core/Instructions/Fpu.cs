@@ -5,11 +5,11 @@ using Assembler.Core.PortableExecutable;
 
 namespace Assembler.Core.Instructions
 {
-    public class Fstp_Offset : X86Instruction
+    public class Fstp_RegisterOffset : X86Instruction
     {
         public RegisterOffset Destination { get; set; }
 
-        public Fstp_Offset(RegisterOffset destination)
+        public Fstp_RegisterOffset(RegisterOffset destination)
         {
             Destination = destination;
         }
@@ -19,7 +19,7 @@ namespace Assembler.Core.Instructions
             return $"fstp {Destination}";
         }
 
-        public override byte[] Assemble(Section section, Dictionary<string, Address> resolvedLabels)
+        public override byte[] Assemble(Section section, uint absoluteInstructionPointer, Dictionary<string, Address> resolvedLabels)
         {
             byte opCode = 0xD9;
             //Here ebx is 011 which is opcode extension 3
@@ -30,11 +30,11 @@ namespace Assembler.Core.Instructions
         public override uint GetSizeOnDisk() => 1 + (uint)Destination.EncodeAsRM(X86Register.ebx).Length;
     }  
 
-    public class Fld_Offset : X86Instruction
+    public class Fld_RegisterOffset : X86Instruction
     {
         public RegisterOffset Source { get; set; }
 
-        public Fld_Offset(RegisterOffset source)
+        public Fld_RegisterOffset(RegisterOffset source)
         {
             Source = source;
         }
@@ -44,7 +44,7 @@ namespace Assembler.Core.Instructions
             return $"fld {Source}";
         }
 
-        public override byte[] Assemble(Section section, Dictionary<string, Address> resolvedLabels)
+        public override byte[] Assemble(Section section, uint absoluteInstructionPointer, Dictionary<string, Address> resolvedLabels)
         {
             byte opCode = 0xD9;
             //Here eax is 000 which is opcode extension 0
@@ -69,7 +69,7 @@ namespace Assembler.Core.Instructions
             return $"fild {Source}";
         }
 
-        public override byte[] Assemble(Section section, Dictionary<string, Address> resolvedLabels)
+        public override byte[] Assemble(Section section, uint absoluteInstructionPointer, Dictionary<string, Address> resolvedLabels)
         {
             byte opCode = 0xDB;
             //Here eax is 000 which is opcode extension 0
@@ -94,7 +94,7 @@ namespace Assembler.Core.Instructions
             return $"fistp {Source}";
         }
 
-        public override byte[] Assemble(Section section, Dictionary<string, Address> resolvedLabels)
+        public override byte[] Assemble(Section section, uint absoluteInstructionPointer, Dictionary<string, Address> resolvedLabels)
         {
             byte opCode = 0xDB;
             //Here ebx is 011 which is opcode extension 3

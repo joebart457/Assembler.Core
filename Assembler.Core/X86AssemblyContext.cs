@@ -266,13 +266,13 @@ public class X86AssemblyContext
     public Cdq Cdq() => CurrentFunction.AddInstruction(new Cdq());
 
     public  Push_Register Push(X86Register register) => CurrentFunction.AddInstruction(new Push_Register(register));
-    public  Push_Offset Push(RegisterOffset offset) => CurrentFunction.AddInstruction(new Push_Offset(offset));
+    public  Push_RegisterOffset Push(RegisterOffset offset) => CurrentFunction.AddInstruction(new Push_RegisterOffset(offset));
     public  Push_Address Push(string address) => CurrentFunction.AddInstruction(new Push_Address(address));
     public  Push_Immediate<int> Push(int immediateValue) => CurrentFunction.AddInstruction(new Push_Immediate<int>(immediateValue));
     public Push_Immediate<float> Push(float immediateValue) => CurrentFunction.AddInstruction(new Push_Immediate<float>(immediateValue));
     public  Push_SymbolOffset Push(SymbolOffset offset) => CurrentFunction.AddInstruction(new Push_SymbolOffset(offset));
 
-    public  Lea_Register_Offset Lea(X86Register destination, RegisterOffset source) => CurrentFunction.AddInstruction(new Lea_Register_Offset(destination, source));
+    public  Lea_Register_RegisterOffset Lea(X86Register destination, RegisterOffset source) => CurrentFunction.AddInstruction(new Lea_Register_RegisterOffset(destination, source));
     public  Lea_Register_SymbolOffset Lea(X86Register destination, SymbolOffset source) => CurrentFunction.AddInstruction(new Lea_Register_SymbolOffset(destination, source));
 
     public  Mov_Register_Offset Mov(X86Register destination, RegisterOffset source) => CurrentFunction.AddInstruction(new Mov_Register_Offset(destination, source));
@@ -306,18 +306,18 @@ public class X86AssemblyContext
 
     public  Pop_Register Pop(X86Register destination) => CurrentFunction.AddInstruction(new Pop_Register(destination));
 
-    public  Neg_Offset Neg(RegisterOffset destination) => CurrentFunction.AddInstruction(new Neg_Offset(destination));
-    public  Not_Offset Not(RegisterOffset destination) => CurrentFunction.AddInstruction(new Not_Offset(destination));
+    public  Neg_RegisterOffset Neg(RegisterOffset destination) => CurrentFunction.AddInstruction(new Neg_RegisterOffset(destination));
+    public  Not_RegisterOffset Not(RegisterOffset destination) => CurrentFunction.AddInstruction(new Not_RegisterOffset(destination));
 
     public  Inc_Register Inc(X86Register destination) => CurrentFunction.AddInstruction(new Inc_Register(destination));
     public  Dec_Register Dec(X86Register destination) => CurrentFunction.AddInstruction(new Dec_Register(destination));
-    public  Inc_Offset Inc(RegisterOffset destination) => CurrentFunction.AddInstruction(new Inc_Offset(destination));
-    public  Dec_Offset Dec(RegisterOffset destination) => CurrentFunction.AddInstruction(new Dec_Offset(destination));
+    public  Inc_RegisterOffset Inc(RegisterOffset destination) => CurrentFunction.AddInstruction(new Inc_RegisterOffset(destination));
+    public  Dec_RegisterOffset Dec(RegisterOffset destination) => CurrentFunction.AddInstruction(new Dec_RegisterOffset(destination));
 
-    public  IDiv_Offset IDiv(RegisterOffset divisor) => CurrentFunction.AddInstruction(new IDiv_Offset(divisor));
+    public  IDiv_RegisterOffset IDiv(RegisterOffset divisor) => CurrentFunction.AddInstruction(new IDiv_RegisterOffset(divisor));
     public  IMul_Register_Register IMul(X86Register destination, X86Register source) => CurrentFunction.AddInstruction(new IMul_Register_Register(destination, source));
     public  IMul_Register_Immediate IMul(X86Register destination, int immediate) => CurrentFunction.AddInstruction(new IMul_Register_Immediate(destination, immediate));
-    public  Add_Register_Offset Add(X86Register destination, RegisterOffset source) => CurrentFunction.AddInstruction(new Add_Register_Offset(destination, source));
+    public  Add_Register_RegisterOffset Add(X86Register destination, RegisterOffset source) => CurrentFunction.AddInstruction(new Add_Register_RegisterOffset(destination, source));
 
 
     public  Jmp Jmp(string label) => CurrentFunction.AddInstruction(new Jmp(label));
@@ -337,7 +337,7 @@ public class X86AssemblyContext
     public  Jbe Jbe(string label) => CurrentFunction.AddInstruction(new Jbe(label));
 
     public  Test_Register_Register Test(X86Register operand1, X86Register operand2) => CurrentFunction.AddInstruction(new Test_Register_Register(operand1, operand2));
-    public  Test_Register_Offset Test(X86Register operand1, RegisterOffset operand2) => CurrentFunction.AddInstruction(new Test_Register_Offset(operand1, operand2));
+    public  Test_Register_RegisterOffset Test(X86Register operand1, RegisterOffset operand2) => CurrentFunction.AddInstruction(new Test_Register_RegisterOffset(operand1, operand2));
     public  Cmp_Register_Register Cmp(X86Register operand1, X86Register operand2) => CurrentFunction.AddInstruction(new Cmp_Register_Register(operand1, operand2));
     public  Cmp_Register_Immediate Cmp(X86Register operand1, int operand2) => CurrentFunction.AddInstruction(new Cmp_Register_Immediate(operand1, operand2));
     public  Cmp_Byte_Byte Cmp(X86ByteRegister operand1, X86ByteRegister operand2) => CurrentFunction.AddInstruction(new Cmp_Byte_Byte(operand1, operand2));
@@ -349,21 +349,21 @@ public class X86AssemblyContext
     public  Ret Ret() => CurrentFunction.AddInstruction(new Ret());
     public  Ret_Immediate Ret(int immediate) => CurrentFunction.AddInstruction(new Ret_Immediate(immediate));
 
-    public  Fstp_Offset Fstp(RegisterOffset destination) => CurrentFunction.AddInstruction(new Fstp_Offset(destination));
-    public  Fld_Offset Fld(RegisterOffset source) => CurrentFunction.AddInstruction(new Fld_Offset(source));
+    public  Fstp_RegisterOffset Fstp(RegisterOffset destination) => CurrentFunction.AddInstruction(new Fstp_RegisterOffset(destination));
+    public  Fld_RegisterOffset Fld(RegisterOffset source) => CurrentFunction.AddInstruction(new Fld_RegisterOffset(source));
 
-    public  Movss_Offset_Register Movss(RegisterOffset destination, XmmRegister source) => CurrentFunction.AddInstruction(new Movss_Offset_Register(destination, source));
-    public  Movss_Register_Offset Movss(XmmRegister destination, RegisterOffset source) => CurrentFunction.AddInstruction(new Movss_Register_Offset(destination, source));
+    public  Movss_RegisterOffset_Register Movss(RegisterOffset destination, XmmRegister source) => CurrentFunction.AddInstruction(new Movss_RegisterOffset_Register(destination, source));
+    public  Movss_Register_RegisterOffset Movss(XmmRegister destination, RegisterOffset source) => CurrentFunction.AddInstruction(new Movss_Register_RegisterOffset(destination, source));
     public  Movss_Register_Register Movss(XmmRegister destination, XmmRegister source) => CurrentFunction.AddInstruction(new Movss_Register_Register(destination, source));
-    public  Comiss_Register_Offset Comiss(XmmRegister destination, RegisterOffset source) => CurrentFunction.AddInstruction(new Comiss_Register_Offset(destination, source));
+    public  Comiss_Register_RegisterOffset Comiss(XmmRegister destination, RegisterOffset source) => CurrentFunction.AddInstruction(new Comiss_Register_RegisterOffset(destination, source));
     public  Comiss_Register_Register Comiss(XmmRegister destination, XmmRegister source) => CurrentFunction.AddInstruction(new Comiss_Register_Register(destination, source));
     public  Ucomiss_Register_Register Ucomiss(XmmRegister destination, XmmRegister source) => CurrentFunction.AddInstruction(new Ucomiss_Register_Register(destination, source));
-    public  Addss_Register_Offset Addss(XmmRegister destination, RegisterOffset source) => CurrentFunction.AddInstruction(new Addss_Register_Offset(destination, source));
-    public  Subss_Register_Offset Subss(XmmRegister destination, RegisterOffset source) => CurrentFunction.AddInstruction(new Subss_Register_Offset(destination, source));
-    public  Mulss_Register_Offset Mulss(XmmRegister destination, RegisterOffset source) => CurrentFunction.AddInstruction(new Mulss_Register_Offset(destination, source));
-    public  Divss_Register_Offset Divss(XmmRegister destination, RegisterOffset source) => CurrentFunction.AddInstruction(new Divss_Register_Offset(destination, source));
-    public  Cvtsi2ss_Register_Offset Cvtsi2ss(XmmRegister destination, RegisterOffset source) => CurrentFunction.AddInstruction(new Cvtsi2ss_Register_Offset(destination, source));
-    public  Cvtss2si_Register_Offset Cvtss2si(X86Register destination, RegisterOffset source) => CurrentFunction.AddInstruction(new Cvtss2si_Register_Offset(destination, source));
+    public  Addss_Register_RegisterOffset Addss(XmmRegister destination, RegisterOffset source) => CurrentFunction.AddInstruction(new Addss_Register_RegisterOffset(destination, source));
+    public  Subss_Register_RegisterOffset Subss(XmmRegister destination, RegisterOffset source) => CurrentFunction.AddInstruction(new Subss_Register_RegisterOffset(destination, source));
+    public  Mulss_Register_RegisterOffset Mulss(XmmRegister destination, RegisterOffset source) => CurrentFunction.AddInstruction(new Mulss_Register_RegisterOffset(destination, source));
+    public  Divss_Register_RegisterOffset Divss(XmmRegister destination, RegisterOffset source) => CurrentFunction.AddInstruction(new Divss_Register_RegisterOffset(destination, source));
+    public  Cvtsi2ss_Register_RegisterOffset Cvtsi2ss(XmmRegister destination, RegisterOffset source) => CurrentFunction.AddInstruction(new Cvtsi2ss_Register_RegisterOffset(destination, source));
+    public  Cvtss2si_Register_RegisterOffset Cvtss2si(X86Register destination, RegisterOffset source) => CurrentFunction.AddInstruction(new Cvtss2si_Register_RegisterOffset(destination, source));
 
 
 

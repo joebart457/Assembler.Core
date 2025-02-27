@@ -5,11 +5,11 @@ using Assembler.Core.PortableExecutable;
 
 namespace Assembler.Core.Instructions
 {
-    public class Mov_Register_Offset : X86Instruction
+    public class Mov_Register_RegisterOffset : X86Instruction
     {
         public X86Register Destination { get; set; }
         public RegisterOffset Source { get; set; }
-        public Mov_Register_Offset(X86Register destination, RegisterOffset source)
+        public Mov_Register_RegisterOffset(X86Register destination, RegisterOffset source)
         {
             Destination = destination;
             Source = source;
@@ -20,7 +20,7 @@ namespace Assembler.Core.Instructions
             return $"mov {Destination}, {Source}";
         }
 
-        public override byte[] Assemble(Section section, Dictionary<string, Address> resolvedLabels)
+        public override byte[] Assemble(Section section, uint absoluteInstructionPointer, Dictionary<string, Address> resolvedLabels)
         {
             byte opCode = 0x8B;
             return opCode.Encode(Source.EncodeAsRM(Destination));
@@ -29,11 +29,11 @@ namespace Assembler.Core.Instructions
         public override uint GetVirtualSize() => 1 + (uint)Source.EncodeAsRM(Destination).Length;
     }
 
-    public class Mov_Offset_Register : X86Instruction
+    public class Mov_RegisterOffset_Register : X86Instruction
     {
         public RegisterOffset Destination { get; set; }
         public X86Register Source { get; set; }
-        public Mov_Offset_Register(RegisterOffset destination, X86Register source)
+        public Mov_RegisterOffset_Register(RegisterOffset destination, X86Register source)
         {
             Destination = destination;
             Source = source;
@@ -44,7 +44,7 @@ namespace Assembler.Core.Instructions
             return $"mov {Destination}, {Source}";
         }
 
-        public override byte[] Assemble(Section section, Dictionary<string, Address> resolvedLabels)
+        public override byte[] Assemble(Section section, uint absoluteInstructionPointer, Dictionary<string, Address> resolvedLabels)
         {
             byte opCode = 89;
             return opCode.Encode(Destination.EncodeAsRM(Source));
@@ -69,7 +69,7 @@ namespace Assembler.Core.Instructions
             return $"mov {Destination}, {Source}";
         }
 
-        public override byte[] Assemble(Section section, Dictionary<string, Address> resolvedLabels)
+        public override byte[] Assemble(Section section, uint absoluteInstructionPointer, Dictionary<string, Address> resolvedLabels)
         {
             // 8B /r	MOV r32, r/m32	RM	Valid	Valid	Move r/m32 to r32.
             byte opCode = 0x8B;
@@ -96,7 +96,7 @@ namespace Assembler.Core.Instructions
             return $"mov {Destination}, {ImmediateValue}";
         }
 
-        public override byte[] Assemble(Section section, Dictionary<string, Address> resolvedLabels)
+        public override byte[] Assemble(Section section, uint absoluteInstructionPointer, Dictionary<string, Address> resolvedLabels)
         {
             byte opCode = 0xB8;
             opCode = opCode.ApplyRegister(Destination);
@@ -107,11 +107,11 @@ namespace Assembler.Core.Instructions
 
     }
 
-    public class Mov_Offset_Immediate : X86Instruction
+    public class Mov_RegisterOffset_Immediate : X86Instruction
     {
         public RegisterOffset Destination { get; set; }
         public int Immediate { get; set; }
-        public Mov_Offset_Immediate(RegisterOffset destination, int immediate)
+        public Mov_RegisterOffset_Immediate(RegisterOffset destination, int immediate)
         {
             Destination = destination;
             Immediate = immediate;
@@ -122,7 +122,7 @@ namespace Assembler.Core.Instructions
             return $"mov {Destination}, {Immediate}";
         }
 
-        public override byte[] Assemble(Section section, Dictionary<string, Address> resolvedLabels)
+        public override byte[] Assemble(Section section, uint absoluteInstructionPointer, Dictionary<string, Address> resolvedLabels)
         {
             byte opCode = 0xC7;
             return opCode
@@ -148,7 +148,7 @@ namespace Assembler.Core.Instructions
         {
             return $"mov {Destination}, {Source}";
         }
-        public override byte[] Assemble(Section section, Dictionary<string, Address> resolvedLabels)
+        public override byte[] Assemble(Section section, uint absoluteInstructionPointer, Dictionary<string, Address> resolvedLabels)
         {
             var address = GetAddressOrThrow(resolvedLabels, Destination.Symbol);
             byte opCode = 0x89;
@@ -174,7 +174,7 @@ namespace Assembler.Core.Instructions
             return $"mov {Destination}, {ImmediateValue}";
         }
 
-        public override byte[] Assemble(Section section, Dictionary<string, Address> resolvedLabels)
+        public override byte[] Assemble(Section section, uint absoluteInstructionPointer, Dictionary<string, Address> resolvedLabels)
         {
             var address = GetAddressOrThrow (resolvedLabels, Destination.Symbol);
             byte opCode = 0xC7;
@@ -187,11 +187,11 @@ namespace Assembler.Core.Instructions
 
     }
 
-    public class Mov_SymbolOffset_Register__Byte : X86Instruction
+    public class Mov_SymbolOffset_ByteRegister : X86Instruction
     {
         public SymbolOffset Destination { get; set; }
         public X86ByteRegister Source { get; set; }
-        public Mov_SymbolOffset_Register__Byte(SymbolOffset destination, X86ByteRegister source)
+        public Mov_SymbolOffset_ByteRegister(SymbolOffset destination, X86ByteRegister source)
         {
             Destination = destination;
             Source = source;
@@ -202,7 +202,7 @@ namespace Assembler.Core.Instructions
             return $"mov {Destination}, {Source}";
         }
 
-        public override byte[] Assemble(Section section, Dictionary<string, Address> resolvedLabels)
+        public override byte[] Assemble(Section section, uint absoluteInstructionPointer, Dictionary<string, Address> resolvedLabels)
         {
             var address = GetAddressOrThrow(resolvedLabels, Destination.Symbol);
             byte opCode = 0x88;
@@ -215,52 +215,11 @@ namespace Assembler.Core.Instructions
     }
 
 
-    // TODO?
-    public class Mov_SymbolOffset_Byte_Register__Byte : X86Instruction
-    {
-        public SymbolOffset_Byte Destination { get; set; }
-        public X86ByteRegister Source { get; set; }
-        public Mov_SymbolOffset_Byte_Register__Byte(SymbolOffset_Byte destination, X86ByteRegister source)
-        {
-            Destination = destination;
-            Source = source;
-        }
-
-        public override string Emit()
-        {
-            return $"mov {Destination}, {Source}";
-        }
-    }
-
-
-    // TODO?
-    public class Mov_RegisterOffset_Byte_Register__Byte : X86Instruction
-    {
-        public RegisterOffset_Byte Destination { get; set; }
-        public X86ByteRegister Source { get; set; }
-        public Mov_RegisterOffset_Byte_Register__Byte(RegisterOffset_Byte destination, X86ByteRegister source)
-        {
-            Destination = destination;
-            Source = source;
-        }
-
-        public override string Emit()
-        {
-            return $"mov {Destination}, {Source}";
-        }
-
-        public override byte[] Assemble(Section section, Dictionary<string, Address> resolvedLabels)
-        {
-            byte opCode = 88;
-            return opCode.Encode(Destination.EncodeAsRM(Source));
-        }
-    }
-
-    public class Mov_RegisterOffset_Register__Byte : X86Instruction
+    public class Mov_RegisterOffset_ByteRegister : X86Instruction
     {
         public RegisterOffset Destination { get; set; }
         public X86ByteRegister Source { get; set; }
-        public Mov_RegisterOffset_Register__Byte(RegisterOffset destination, X86ByteRegister source)
+        public Mov_RegisterOffset_ByteRegister(RegisterOffset destination, X86ByteRegister source)
         {
             Destination = destination;
             Source = source;
@@ -271,9 +230,9 @@ namespace Assembler.Core.Instructions
             return $"mov {Destination}, {Source}";
         }
 
-        public override byte[] Assemble(Section section, Dictionary<string, Address> resolvedLabels)
+        public override byte[] Assemble(Section section, uint absoluteInstructionPointer, Dictionary<string, Address> resolvedLabels)
         {
-            byte opCode = 88;
+            byte opCode = 0x88;
             return opCode.Encode(Destination.EncodeAsRM(Source));
         }
 

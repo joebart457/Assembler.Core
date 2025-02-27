@@ -7,11 +7,11 @@ using Assembler.Core.PortableExecutable;
 
 namespace Assembler.Core.Instructions
 {
-    public class Not_Offset : X86Instruction
+    public class Not_RegisterOffset : X86Instruction
     {
         public RegisterOffset Operand { get; set; }
 
-        public Not_Offset(RegisterOffset operand)
+        public Not_RegisterOffset(RegisterOffset operand)
         {
             Operand = operand;
         }
@@ -21,7 +21,7 @@ namespace Assembler.Core.Instructions
             return $"not {Operand}";
         }
 
-        public override byte[] Assemble(Section section, Dictionary<string, Address> resolvedLabels)
+        public override byte[] Assemble(Section section, uint absoluteInstructionPointer, Dictionary<string, Address> resolvedLabels)
         {
             byte opCode = 0xF7;
             // Here edx is 010 which is opcode extension 2
@@ -47,7 +47,7 @@ namespace Assembler.Core.Instructions
             return $"not {Operand}";
         }
 
-        public override byte[] Assemble(Section section, Dictionary<string, Address> resolvedLabels)
+        public override byte[] Assemble(Section section, uint absoluteInstructionPointer, Dictionary<string, Address> resolvedLabels)
         {
             byte opCode = 0xF7;
             // Here edx is 010 which is opcode extension 2

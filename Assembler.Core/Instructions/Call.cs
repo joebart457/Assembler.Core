@@ -58,7 +58,7 @@ namespace Assembler.Core.Instructions
             return $"call {Callee}";
         }
 
-        public override byte[] Assemble(Section section, Dictionary<string, Address> resolvedLabels)
+        public override byte[] Assemble(Section section, uint absoluteInstructionPointer, Dictionary<string, Address> resolvedLabels)
         {
             byte opCode = 0xFF;
             // ECX is encoded as 0b00_010_000 which in this case is used not as a reg but as the instruction opcode extension
@@ -82,7 +82,7 @@ namespace Assembler.Core.Instructions
             return $"call {Callee}";
         }
 
-        public override byte[] Assemble(Section section, Dictionary<string, Address> resolvedLabels)
+        public override byte[] Assemble(Section section, uint absoluteInstructionPointer, Dictionary<string, Address> resolvedLabels)
         {
             byte opCode = 0xFF;
             // ECX is encoded as 0b00_010_000 which in this case is used not as a reg but as the instruction opcode extension

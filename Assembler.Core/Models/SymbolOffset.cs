@@ -35,8 +35,6 @@ namespace Assembler.Core.Models
             return Symbol.GetHashCode();
         }
 
-        public IOffset ToByteOffset() => new SymbolOffset_Byte(Symbol, Offset);
-
         public byte[] EncodeAsRM(X86Register reg, Address address)
         {
             return Mod.MemoryModeNoDisplacement.ApplyOperand1(reg).ApplyOperand2(X86Register.ebp).Encode(address.VirtualAddress.ToBytes());

@@ -56,9 +56,11 @@ namespace Assembler.Core.PortableExecutable
         public virtual List<byte> Assemble(Dictionary<string, Address> resolvedLabels)
         {
             var result = new List<byte>();
+            var absoluteInstructionPointer = AbsoluteVirtualAddress;
             foreach (var instruction in DataInstructions)
             {
-                result.AddRange(instruction.Assemble(this, resolvedLabels));
+                result.AddRange(instruction.Assemble(this, absoluteInstructionPointer, resolvedLabels));
+                absoluteInstructionPointer += instruction.GetVirtualSize();
             }
             return result;
         }

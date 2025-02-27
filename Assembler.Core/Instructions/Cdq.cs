@@ -10,7 +10,7 @@ namespace Assembler.Core.Instructions
             return $"cdq";
         }
 
-        public override byte[] Assemble(Section section, Dictionary<string, Address> resolvedLabels)
+        public override byte[] Assemble(Section section, uint absoluteInstructionPointer, Dictionary<string, Address> resolvedLabels)
         {
             byte opCode = 0x99;
             return [opCode];

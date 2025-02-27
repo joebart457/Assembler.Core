@@ -20,7 +20,7 @@ namespace Assembler.Core.Instructions
             return $"test {Destination}, {Source}";
         }
 
-        public override byte[] Assemble(Section section, Dictionary<string, Address> resolvedLabels)
+        public override byte[] Assemble(Section section, uint absoluteInstructionPointer, Dictionary<string, Address> resolvedLabels)
         {
             byte opCode = 0x85;
             var modRM = Mod.RegisterDirect.ApplyOperand1(Source).ApplyOperand2(Destination);
@@ -31,11 +31,11 @@ namespace Assembler.Core.Instructions
         public override uint GetVirtualSize() => 2;
     }
 
-    public class Test_Register_Offset : X86Instruction
+    public class Test_Register_RegisterOffset : X86Instruction
     {
         public X86Register Operand1 { get; set; }
         public RegisterOffset Operand2 { get; set; }
-        public Test_Register_Offset(X86Register operand1, RegisterOffset operand2)
+        public Test_Register_RegisterOffset(X86Register operand1, RegisterOffset operand2)
         {
             Operand1 = operand1;
             Operand2 = operand2;
@@ -46,7 +46,7 @@ namespace Assembler.Core.Instructions
             return $"test {Operand1}, {Operand2}";
         }
 
-        public override byte[] Assemble(Section section, Dictionary<string, Address> resolvedLabels)
+        public override byte[] Assemble(Section section, uint absoluteInstructionPointer, Dictionary<string, Address> resolvedLabels)
         {
             byte opCode = 0x85;
             return opCode.Encode(Operand2.EncodeAsRM(Operand1));

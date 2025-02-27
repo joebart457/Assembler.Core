@@ -32,7 +32,7 @@ public class DefineDoubleWord : X86Instruction
         throw new NotImplementedException();
     }
 
-    public override byte[] Assemble(Section section, Dictionary<string, Address> resolvedLabels)
+    public override byte[] Assemble(Section section, uint absoluteInstructionPointer, Dictionary<string, Address> resolvedLabels)
     {
         var result = new List<byte>();  
         foreach(var dw in DoubleWords)
@@ -60,7 +60,7 @@ public class DefineDoubleWord_Rva : X86Instruction
         throw new NotImplementedException();
     }
 
-    public override byte[] Assemble(Section section, Dictionary<string, Address> resolvedLabels)
+    public override byte[] Assemble(Section section, uint absoluteInstructionPointer, Dictionary<string, Address> resolvedLabels)
     {
         var address = GetAddressOrThrow(resolvedLabels, Rva.Symbol);
         return BitConverter.GetBytes(address.RelativeVirtualAddress);
@@ -84,7 +84,7 @@ public class DefineDoubleWord_Address : X86Instruction
         throw new NotImplementedException();
     }
 
-    public override byte[] Assemble(Section section, Dictionary<string, Address> resolvedLabels)
+    public override byte[] Assemble(Section section, uint absoluteInstructionPointer, Dictionary<string, Address> resolvedLabels)
     {
         var address = GetAddressOrThrow(resolvedLabels, Symbol);
         return BitConverter.GetBytes(address.VirtualAddress);

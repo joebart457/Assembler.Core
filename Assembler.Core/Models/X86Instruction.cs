@@ -21,13 +21,9 @@ namespace Assembler.Core.Models
         }
         public virtual void AddRelocationEntry(BaseRelocationBlock baseRelocationBlock, ushort currentVirtualOffsetFromSectionStart)
         {
-
         }
 
-        public virtual byte[] Assemble(Section section, Dictionary<string, Address> resolvedLabels)
-        {
-            throw new NotImplementedException();
-        }
+        public abstract byte[] Assemble(Section section, uint absoluteInstructionPointer, Dictionary<string, Address> resolvedLabels);
 
 
         protected Address GetAddressOrThrow(Dictionary<string, Address> resolvedLabels, string symbol)

@@ -22,7 +22,7 @@ namespace Assembler.Core.Instructions
             return $"and {Destination}, {Source}";
         }
 
-        public override byte[] Assemble(Section section, Dictionary<string, Address> resolvedLabels)
+        public override byte[] Assemble(Section section, uint absoluteInstructionPointer, Dictionary<string, Address> resolvedLabels)
         {
             byte opCode = 0x21;
             var modRM = Mod.RegisterDirect.ApplyOperand1(Source).ApplyOperand2(Destination);
@@ -49,7 +49,7 @@ namespace Assembler.Core.Instructions
             return $"and {Destination}, {Source}";
         }
 
-        public override byte[] Assemble(Section section, Dictionary<string, Address> resolvedLabels)
+        public override byte[] Assemble(Section section, uint absoluteInstructionPointer, Dictionary<string, Address> resolvedLabels)
         {
             byte opCode = 0x22;
             var modRM = Mod.RegisterDirect.ApplyOperand1(Source).ApplyOperand2(Destination);

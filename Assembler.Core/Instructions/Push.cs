@@ -18,7 +18,7 @@ namespace Assembler.Core.Instructions
             return $"push {Register}";
         }
 
-        public override byte[] Assemble(Section section, Dictionary<string, Address> resolvedLabels)
+        public override byte[] Assemble(Section section, uint absoluteInstructionPointer, Dictionary<string, Address> resolvedLabels)
         {
             byte opCode = 0x50;
             return [opCode.ApplyRegister(Register)];
@@ -28,10 +28,10 @@ namespace Assembler.Core.Instructions
         public override uint GetVirtualSize() => 1;
     }
 
-    public class Push_Offset : X86Instruction
+    public class Push_RegisterOffset : X86Instruction
     {
         public RegisterOffset Offset { get; set; }
-        public Push_Offset(RegisterOffset offset)
+        public Push_RegisterOffset(RegisterOffset offset)
         {
             Offset = offset;
         }
@@ -41,7 +41,7 @@ namespace Assembler.Core.Instructions
             return $"push {Offset}";
         }
 
-        public override byte[] Assemble(Section section, Dictionary<string, Address> resolvedLabels)
+        public override byte[] Assemble(Section section, uint absoluteInstructionPointer, Dictionary<string, Address> resolvedLabels)
         {
             byte opCode = 0xFF;
             // here esi is 110 opcode extension 6
@@ -65,7 +65,7 @@ namespace Assembler.Core.Instructions
             return $"push {Offset}";
         }
 
-        public override byte[] Assemble(Section section, Dictionary<string, Address> resolvedLabels)
+        public override byte[] Assemble(Section section, uint absoluteInstructionPointer, Dictionary<string, Address> resolvedLabels)
         {
             var address = GetAddressOrThrow(resolvedLabels, Offset.Symbol);
             byte opCode = 0xFF;
@@ -98,7 +98,7 @@ namespace Assembler.Core.Instructions
             baseRelocationBlock.AddEntry(currentRVA + 1);
         }
 
-        public override byte[] Assemble(Section section, Dictionary<string, Address> resolvedLabels)
+        public override byte[] Assemble(Section section, uint absoluteInstructionPointer, Dictionary<string, Address> resolvedLabels)
         {
             List<byte> resultBytes = [0x68];
             var address = GetAddressOrThrow(resolvedLabels, Address);
@@ -121,7 +121,7 @@ namespace Assembler.Core.Instructions
             return $"push {Immediate}";
         }
 
-        public override byte[] Assemble(Section section, Dictionary<string, Address> resolvedLabels)
+        public override byte[] Assemble(Section section, uint absoluteInstructionPointer, Dictionary<string, Address> resolvedLabels)
         {
             byte opCode = 0x68;
             // here esi is 110 opcode extension 6

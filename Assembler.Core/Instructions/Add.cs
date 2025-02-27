@@ -21,7 +21,7 @@ namespace Assembler.Core.Instructions
             return $"add {Destination}, {ValueToAdd}";
         }
 
-        public override byte[] Assemble(Section section, Dictionary<string, Address> resolvedLabels)
+        public override byte[] Assemble(Section section, uint absoluteInstructionPointer, Dictionary<string, Address> resolvedLabels)
         {
             byte opCode = 0x81;
             var modRM = Mod.RegisterDirect.ApplyOperand2(Destination);
@@ -48,7 +48,7 @@ namespace Assembler.Core.Instructions
             return $"add {Destination}, {Source}";
         }
 
-        public override byte[] Assemble(Section section, Dictionary<string, Address> resolvedLabels)
+        public override byte[] Assemble(Section section, uint absoluteInstructionPointer, Dictionary<string, Address> resolvedLabels)
         {
             byte opCode = 0x01;
             var modRM = Mod.RegisterDirect.ApplyOperand1(Source).ApplyOperand2(Destination);
@@ -59,12 +59,12 @@ namespace Assembler.Core.Instructions
         public override uint GetVirtualSize() => 2;
     }
 
-    public class Add_Register_Offset : X86Instruction
+    public class Add_Register_RegisterOffset : X86Instruction
     {
         public X86Register Destination { get; set; }
         public RegisterOffset Source { get; set; }
 
-        public Add_Register_Offset(X86Register destination, RegisterOffset source)
+        public Add_Register_RegisterOffset(X86Register destination, RegisterOffset source)
         {
             Destination = destination;
             Source = source;
@@ -75,7 +75,7 @@ namespace Assembler.Core.Instructions
             return $"add {Destination}, {Source}";
         }
 
-        public override byte[] Assemble(Section section, Dictionary<string, Address> resolvedLabels)
+        public override byte[] Assemble(Section section, uint absoluteInstructionPointer, Dictionary<string, Address> resolvedLabels)
         {
             byte opCode = 0x03;
             return opCode.Encode(Source.EncodeAsRM(Destination));

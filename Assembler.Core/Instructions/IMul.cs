@@ -22,7 +22,7 @@ namespace Assembler.Core.Instructions
         }
 
 
-        public override byte[] Assemble(Section section, Dictionary<string, Address> resolvedLabels)
+        public override byte[] Assemble(Section section, uint absoluteInstructionPointer, Dictionary<string, Address> resolvedLabels)
         {
             var opCode = new List<byte>() { 0x0F, 0xAF };
             var modRM = Mod.RegisterDirect.ApplyOperand1(Source).ApplyOperand2(Destination);
@@ -49,14 +49,14 @@ namespace Assembler.Core.Instructions
             return $"imul {Destination}, {Immediate}";
         }
 
-        public override byte[] Assemble(Section section, Dictionary<string, Address> resolvedLabels)
+        public override byte[] Assemble(Section section, uint absoluteInstructionPointer, Dictionary<string, Address> resolvedLabels)
         {
             byte opCode = 0x69;
             var modRM = Mod.RegisterDirect.ApplyOperand1(Destination).ApplyOperand2(Destination);
             return new List<byte>() { opCode, modRM }.Concat(Immediate.ToBytes()).ToArray();
         }
 
-        public override uint GetVirtualSize() => 3;
-        public override uint GetSizeOnDisk() => 3;
+        public override uint GetVirtualSize() => 6;
+        public override uint GetSizeOnDisk() => 6;
     }
 }

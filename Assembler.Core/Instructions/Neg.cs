@@ -6,11 +6,11 @@ using Assembler.Core.PortableExecutable;
 
 namespace Assembler.Core.Instructions
 {
-    public class Neg_Offset : X86Instruction
+    public class Neg_RegisterOffset : X86Instruction
     {
         public RegisterOffset Operand { get; set; }
 
-        public Neg_Offset(RegisterOffset operand)
+        public Neg_RegisterOffset(RegisterOffset operand)
         {
             Operand = operand;
         }
@@ -20,7 +20,7 @@ namespace Assembler.Core.Instructions
             return $"neg {Operand}";
         }
 
-        public override byte[] Assemble(Section section, Dictionary<string, Address> resolvedLabels)
+        public override byte[] Assemble(Section section, uint absoluteInstructionPointer, Dictionary<string, Address> resolvedLabels)
         {
             byte opCode = 0xF7;
             // Here ebx is 011 which is opcode extension 3
@@ -46,7 +46,7 @@ namespace Assembler.Core.Instructions
             return $"neg {Operand}";
         }
 
-        public override byte[] Assemble(Section section, Dictionary<string, Address> resolvedLabels)
+        public override byte[] Assemble(Section section, uint absoluteInstructionPointer, Dictionary<string, Address> resolvedLabels)
         {
             byte opCode = 0xF7;
             // Here ebx is 011 which is opcode extension 3

@@ -5,11 +5,11 @@ using Assembler.Core.PortableExecutable;
 
 namespace Assembler.Core.Instructions
 {
-    public class Lea_Register_Offset : X86Instruction
+    public class Lea_Register_RegisterOffset : X86Instruction
     {
         public X86Register Destination { get; set; }
         public RegisterOffset Source { get; set; }
-        public Lea_Register_Offset(X86Register destination, RegisterOffset source)
+        public Lea_Register_RegisterOffset(X86Register destination, RegisterOffset source)
         {
             Destination = destination;
             Source = source;
@@ -20,7 +20,7 @@ namespace Assembler.Core.Instructions
             return $"lea {Destination}, {Source}";
         }
 
-        public override byte[] Assemble(Section section, Dictionary<string, Address> resolvedLabels)
+        public override byte[] Assemble(Section section, uint absoluteInstructionPointer, Dictionary<string, Address> resolvedLabels)
         {
             byte opCode = 0x8D;
             return opCode.Encode(Source.EncodeAsRM(Destination));
@@ -44,7 +44,7 @@ namespace Assembler.Core.Instructions
             return $"lea {Destination}, {Source}";
         }
 
-        public override byte[] Assemble(Section section, Dictionary<string, Address> resolvedLabels)
+        public override byte[] Assemble(Section section, uint absoluteInstructionPointer, Dictionary<string, Address> resolvedLabels)
         {
             var address = GetAddressOrThrow(resolvedLabels, Source.Symbol);
             byte opCode = 0x8D;

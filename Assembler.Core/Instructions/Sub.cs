@@ -20,7 +20,7 @@ namespace Assembler.Core.Instructions
             return $"sub {Destination}, {ValueToSubtract}";
         }
 
-        public override byte[] Assemble(Section section, Dictionary<string, Address> resolvedLabels)
+        public override byte[] Assemble(Section section, uint absoluteInstructionPointer, Dictionary<string, Address> resolvedLabels)
         {
             byte opCode = 0x81;
             // here ebp is 101 which is opcode extension 7
@@ -48,7 +48,7 @@ namespace Assembler.Core.Instructions
             return $"sub {Destination}, {Source}";
         }
 
-        public override byte[] Assemble(Section section, Dictionary<string, Address> resolvedLabels)
+        public override byte[] Assemble(Section section, uint absoluteInstructionPointer, Dictionary<string, Address> resolvedLabels)
         {
             byte opCode = 0x29;
             var modRM = Mod.RegisterDirect.ApplyOperand1(Source).ApplyOperand2(Destination);

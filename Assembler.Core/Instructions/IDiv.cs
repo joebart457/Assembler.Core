@@ -5,11 +5,11 @@ using Assembler.Core.PortableExecutable;
 
 namespace Assembler.Core.Instructions
 {
-    public class IDiv_Offset : X86Instruction
+    public class IDiv_RegisterOffset : X86Instruction
     {
         public RegisterOffset Divisor { get; set; }
 
-        public IDiv_Offset(RegisterOffset divisor)
+        public IDiv_RegisterOffset(RegisterOffset divisor)
         {
             Divisor = divisor;
         }
@@ -19,7 +19,7 @@ namespace Assembler.Core.Instructions
             return $"idiv {Divisor}";
         }
 
-        public override byte[] Assemble(Section section, Dictionary<string, Address> resolvedLabels)
+        public override byte[] Assemble(Section section, uint absoluteInstructionPointer, Dictionary<string, Address> resolvedLabels)
         {
             byte opCode = 0xF7;
             //Here edi is 111 which is opcode extension 7
