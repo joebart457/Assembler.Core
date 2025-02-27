@@ -1,5 +1,7 @@
 ﻿using Assembler.Core.Constants;
+using Assembler.Core.Extensions;
 using Assembler.Core.Models;
+using Assembler.Core.PortableExecutable;
 
 namespace Assembler.Core.Instructions
 {
@@ -15,6 +17,16 @@ namespace Assembler.Core.Instructions
         {
             return $"jmp {Label}";
         }
+
+        public override byte[] Assemble(Section section, uint absoluteInstructionPointer, Dictionary<string, Address> resolvedLabels)
+        {
+            var address = GetAddressOrThrow(resolvedLabels, Label);
+            byte opCode = 0xE9;
+            var offset = address.VirtualAddress - (absoluteInstructionPointer + GetVirtualSize());
+            return opCode.Encode(offset.ToBytes());
+        }
+        public override uint GetSizeOnDisk() => 5;
+        public override uint GetVirtualSize() => 5;
     }
 
     public class JmpGt : Jmp
@@ -28,6 +40,16 @@ namespace Assembler.Core.Instructions
         {
             return $"jg {Label}";
         }
+
+        public override byte[] Assemble(Section section, uint absoluteInstructionPointer, Dictionary<string, Address> resolvedLabels)
+        {
+            var address = GetAddressOrThrow(resolvedLabels, Label);
+            List<byte> opCodes = [0x0F, 0x8F];
+            var offset = address.VirtualAddress - (absoluteInstructionPointer + GetVirtualSize());
+            return opCodes.Concat(offset.ToBytes()).ToArray();
+        }
+        public override uint GetSizeOnDisk() => 6;
+        public override uint GetVirtualSize() => 6;
     }
 
     public class JmpLt : Jmp
@@ -41,6 +63,16 @@ namespace Assembler.Core.Instructions
         {
             return $"jl {Label}";
         }
+
+        public override byte[] Assemble(Section section, uint absoluteInstructionPointer, Dictionary<string, Address> resolvedLabels)
+        {
+            var address = GetAddressOrThrow(resolvedLabels, Label);
+            List<byte> opCodes = [0x0F, 0x8C];
+            var offset = address.VirtualAddress - (absoluteInstructionPointer + GetVirtualSize());
+            return opCodes.Concat(offset.ToBytes()).ToArray();
+        }
+        public override uint GetSizeOnDisk() => 6;
+        public override uint GetVirtualSize() => 6;
     }
 
     public class JmpGte : Jmp
@@ -55,6 +87,17 @@ namespace Assembler.Core.Instructions
         {
             return $"jge {Label}";
         }
+
+        public override byte[] Assemble(Section section, uint absoluteInstructionPointer, Dictionary<string, Address> resolvedLabels)
+        {
+            var address = GetAddressOrThrow(resolvedLabels, Label);
+            List<byte> opCodes = [0x0F, 0x8D];
+            var offset = address.VirtualAddress - (absoluteInstructionPointer + GetVirtualSize());
+            return opCodes.Concat(offset.ToBytes()).ToArray();
+        }
+        public override uint GetSizeOnDisk() => 6;
+        public override uint GetVirtualSize() => 6;
+
     }
 
     public class JmpLte : Jmp
@@ -68,6 +111,16 @@ namespace Assembler.Core.Instructions
         {
             return $"jle {Label}";
         }
+
+        public override byte[] Assemble(Section section, uint absoluteInstructionPointer, Dictionary<string, Address> resolvedLabels)
+        {
+            var address = GetAddressOrThrow(resolvedLabels, Label);
+            List<byte> opCodes = [0x0F, 0x8E];
+            var offset = address.VirtualAddress - (absoluteInstructionPointer + GetVirtualSize());
+            return opCodes.Concat(offset.ToBytes()).ToArray();
+        }
+        public override uint GetSizeOnDisk() => 6;
+        public override uint GetVirtualSize() => 6;
     }
 
     public class JmpEq : Jmp
@@ -81,6 +134,16 @@ namespace Assembler.Core.Instructions
         {
             return $"je {Label}";
         }
+
+        public override byte[] Assemble(Section section, uint absoluteInstructionPointer, Dictionary<string, Address> resolvedLabels)
+        {
+            var address = GetAddressOrThrow(resolvedLabels, Label);
+            List<byte> opCodes = [0x0F, 0x84];
+            var offset = address.VirtualAddress - (absoluteInstructionPointer + GetVirtualSize());
+            return opCodes.Concat(offset.ToBytes()).ToArray();
+        }
+        public override uint GetSizeOnDisk() => 6;
+        public override uint GetVirtualSize() => 6;
     }
 
     public class JmpNeq : Jmp
@@ -94,6 +157,16 @@ namespace Assembler.Core.Instructions
         {
             return $"jne {Label}";
         }
+
+        public override byte[] Assemble(Section section, uint absoluteInstructionPointer, Dictionary<string, Address> resolvedLabels)
+        {
+            var address = GetAddressOrThrow(resolvedLabels, Label);
+            List<byte> opCodes = [0x0F, 0x85];
+            var offset = address.VirtualAddress - (absoluteInstructionPointer + GetVirtualSize());
+            return opCodes.Concat(offset.ToBytes()).ToArray();
+        }
+        public override uint GetSizeOnDisk() => 6;
+        public override uint GetVirtualSize() => 6;
     }
 
     public class Jz : Jmp
@@ -107,6 +180,16 @@ namespace Assembler.Core.Instructions
         {
             return $"jz {Label}";
         }
+
+        public override byte[] Assemble(Section section, uint absoluteInstructionPointer, Dictionary<string, Address> resolvedLabels)
+        {
+            var address = GetAddressOrThrow(resolvedLabels, Label);
+            List<byte> opCodes = [0x0F, 0x84];
+            var offset = address.VirtualAddress - (absoluteInstructionPointer + GetVirtualSize());
+            return opCodes.Concat(offset.ToBytes()).ToArray();
+        }
+        public override uint GetSizeOnDisk() => 6;
+        public override uint GetVirtualSize() => 6;
     }
 
     public class Jnz : Jmp
@@ -120,6 +203,16 @@ namespace Assembler.Core.Instructions
         {
             return $"jnz {Label}";
         }
+
+        public override byte[] Assemble(Section section, uint absoluteInstructionPointer, Dictionary<string, Address> resolvedLabels)
+        {
+            var address = GetAddressOrThrow(resolvedLabels, Label);
+            List<byte> opCodes = [0x0F, 0x85];
+            var offset = address.VirtualAddress - (absoluteInstructionPointer + GetVirtualSize());
+            return opCodes.Concat(offset.ToBytes()).ToArray();
+        }
+        public override uint GetSizeOnDisk() => 6;
+        public override uint GetVirtualSize() => 6;
     }
 
     public class Js : Jmp
@@ -133,6 +226,16 @@ namespace Assembler.Core.Instructions
         {
             return $"js {Label}";
         }
+
+        public override byte[] Assemble(Section section, uint absoluteInstructionPointer, Dictionary<string, Address> resolvedLabels)
+        {
+            var address = GetAddressOrThrow(resolvedLabels, Label);
+            List<byte> opCodes = [0x0F, 0x88];
+            var offset = address.VirtualAddress - (absoluteInstructionPointer + GetVirtualSize());
+            return opCodes.Concat(offset.ToBytes()).ToArray();
+        }
+        public override uint GetSizeOnDisk() => 6;
+        public override uint GetVirtualSize() => 6;
     }
 
     public class Jns : Jmp
@@ -146,6 +249,16 @@ namespace Assembler.Core.Instructions
         {
             return $"jns {Label}";
         }
+
+        public override byte[] Assemble(Section section, uint absoluteInstructionPointer, Dictionary<string, Address> resolvedLabels)
+        {
+            var address = GetAddressOrThrow(resolvedLabels, Label);
+            List<byte> opCodes = [0x0F, 0x85];
+            var offset = address.VirtualAddress - (absoluteInstructionPointer + GetVirtualSize());
+            return opCodes.Concat(offset.ToBytes()).ToArray();
+        }
+        public override uint GetSizeOnDisk() => 6;
+        public override uint GetVirtualSize() => 6;
     }
 
     public class Ja : Jmp
@@ -159,6 +272,16 @@ namespace Assembler.Core.Instructions
         {
             return $"ja {Label}";
         }
+
+        public override byte[] Assemble(Section section, uint absoluteInstructionPointer, Dictionary<string, Address> resolvedLabels)
+        {
+            var address = GetAddressOrThrow(resolvedLabels, Label);
+            List<byte> opCodes = [0x0F, 0x87];
+            var offset = address.VirtualAddress - (absoluteInstructionPointer + GetVirtualSize());
+            return opCodes.Concat(offset.ToBytes()).ToArray();
+        }
+        public override uint GetSizeOnDisk() => 6;
+        public override uint GetVirtualSize() => 6;
     }
 
     public class Jae : Jmp
@@ -172,6 +295,16 @@ namespace Assembler.Core.Instructions
         {
             return $"jae {Label}";
         }
+
+        public override byte[] Assemble(Section section, uint absoluteInstructionPointer, Dictionary<string, Address> resolvedLabels)
+        {
+            var address = GetAddressOrThrow(resolvedLabels, Label);
+            List<byte> opCodes = [0x0F, 0x83];
+            var offset = address.VirtualAddress - (absoluteInstructionPointer + GetVirtualSize());
+            return opCodes.Concat(offset.ToBytes()).ToArray();
+        }
+        public override uint GetSizeOnDisk() => 6;
+        public override uint GetVirtualSize() => 6;
     }
 
     public class Jb : Jmp
@@ -185,6 +318,16 @@ namespace Assembler.Core.Instructions
         {
             return $"jb {Label}";
         }
+
+        public override byte[] Assemble(Section section, uint absoluteInstructionPointer, Dictionary<string, Address> resolvedLabels)
+        {
+            var address = GetAddressOrThrow(resolvedLabels, Label);
+            List<byte> opCodes = [0x0F, 0x82];
+            var offset = address.VirtualAddress - (absoluteInstructionPointer + GetVirtualSize());
+            return opCodes.Concat(offset.ToBytes()).ToArray();
+        }
+        public override uint GetSizeOnDisk() => 6;
+        public override uint GetVirtualSize() => 6;
     }
 
     public class Jbe : Jmp
@@ -199,5 +342,15 @@ namespace Assembler.Core.Instructions
         {
             return $"jbe {Label}";
         }
+
+        public override byte[] Assemble(Section section, uint absoluteInstructionPointer, Dictionary<string, Address> resolvedLabels)
+        {
+            var address = GetAddressOrThrow(resolvedLabels, Label);
+            List<byte> opCodes = [0x0F, 0x86];
+            var offset = address.VirtualAddress - (absoluteInstructionPointer + GetVirtualSize());
+            return opCodes.Concat(offset.ToBytes()).ToArray();
+        }
+        public override uint GetSizeOnDisk() => 6;
+        public override uint GetVirtualSize() => 6;
     }
 }

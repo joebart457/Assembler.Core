@@ -9,4 +9,15 @@ namespace Assembler.Core.Models
         public static SymbolOffset CreateSymbolOffset(string symbol, int offset) => new SymbolOffset(symbol, offset);
         public static SymbolOffset_Byte CreateSymbolByteOffset(string symbol, int offset) => new SymbolOffset_Byte(symbol, offset);
     }
+
+    public class Rva
+    {
+        public static Rva Create(string symbol) => new Rva(symbol);
+        public string Symbol { get; set; }
+
+        public Rva(string symbol)
+        {
+            Symbol = symbol;
+        }
+    }
 }

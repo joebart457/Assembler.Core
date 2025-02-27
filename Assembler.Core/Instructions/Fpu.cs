@@ -1,6 +1,7 @@
 ﻿using Assembler.Core.Constants;
+using Assembler.Core.Extensions;
 using Assembler.Core.Models;
-
+using Assembler.Core.PortableExecutable;
 
 namespace Assembler.Core.Instructions
 {
@@ -17,22 +18,17 @@ namespace Assembler.Core.Instructions
         {
             return $"fstp {Destination}";
         }
-    }
 
-    public class Fstp_Register : X86Instruction
-    {
-        public X87Register Register { get; set; }
-
-        public Fstp_Register(X87Register register)
+        public override byte[] Assemble(Section section, Dictionary<string, Address> resolvedLabels)
         {
-            Register = register;
+            byte opCode = 0xD9;
+            //Here ebx is 011 which is opcode extension 3
+            return opCode.Encode(Destination.EncodeAsRM(X86Register.ebx));
         }
 
-        public override string Emit()
-        {
-            return $"fstp {Register}";
-        }
-    }
+        public override uint GetVirtualSize() => 1 + (uint)Destination.EncodeAsRM(X86Register.ebx).Length;
+        public override uint GetSizeOnDisk() => 1 + (uint)Destination.EncodeAsRM(X86Register.ebx).Length;
+    }  
 
     public class Fld_Offset : X86Instruction
     {
@@ -47,6 +43,16 @@ namespace Assembler.Core.Instructions
         {
             return $"fld {Source}";
         }
+
+        public override byte[] Assemble(Section section, Dictionary<string, Address> resolvedLabels)
+        {
+            byte opCode = 0xD9;
+            //Here eax is 000 which is opcode extension 0
+            return opCode.Encode(Source.EncodeAsRM(X86Register.eax));
+        }
+
+        public override uint GetVirtualSize() => 1 + (uint)Source.EncodeAsRM(X86Register.eax).Length;
+        public override uint GetSizeOnDisk() => 1 + (uint)Source.EncodeAsRM(X86Register.eax).Length;
     }
 
     public class Fild : X86Instruction
@@ -62,6 +68,16 @@ namespace Assembler.Core.Instructions
         {
             return $"fild {Source}";
         }
+
+        public override byte[] Assemble(Section section, Dictionary<string, Address> resolvedLabels)
+        {
+            byte opCode = 0xDB;
+            //Here eax is 000 which is opcode extension 0
+            return opCode.Encode(Source.EncodeAsRM(X86Register.eax));
+        }
+
+        public override uint GetVirtualSize() => 1 + (uint)Source.EncodeAsRM(X86Register.eax).Length;
+        public override uint GetSizeOnDisk() => 1 + (uint)Source.EncodeAsRM(X86Register.eax).Length;
     }
 
     public class Fistp : X86Instruction
@@ -77,6 +93,16 @@ namespace Assembler.Core.Instructions
         {
             return $"fistp {Source}";
         }
+
+        public override byte[] Assemble(Section section, Dictionary<string, Address> resolvedLabels)
+        {
+            byte opCode = 0xDB;
+            //Here ebx is 011 which is opcode extension 3
+            return opCode.Encode(Source.EncodeAsRM(X86Register.ebx));
+        }
+
+        public override uint GetVirtualSize() => 1 + (uint)Source.EncodeAsRM(X86Register.ebx).Length;
+        public override uint GetSizeOnDisk() => 1 + (uint)Source.EncodeAsRM(X86Register.ebx).Length;
     }
 
     public class FAdd : X86Instruction

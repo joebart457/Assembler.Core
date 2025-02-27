@@ -1,5 +1,7 @@
 ﻿using Assembler.Core.Constants;
+using Assembler.Core.Extensions;
 using Assembler.Core.Models;
+using Assembler.Core.PortableExecutable;
 
 namespace Assembler.Core.Instructions
 {
@@ -18,6 +20,16 @@ namespace Assembler.Core.Instructions
         {
             return $"xor {Destination}, {Source}";
         }
+
+        public override byte[] Assemble(Section section, Dictionary<string, Address> resolvedLabels)
+        {
+            byte opCode = 0x31;
+            var modRM = Mod.RegisterDirect.ApplyOperand1(Source).ApplyOperand2(Destination);
+            return [opCode, modRM];
+        }
+
+        public override uint GetSizeOnDisk() => 2;
+        public override uint GetVirtualSize() => 2;
     }
 
     public class Xor_Register_Register__Byte : X86Instruction
@@ -35,5 +47,15 @@ namespace Assembler.Core.Instructions
         {
             return $"xor {Destination}, {Source}";
         }
+
+        public override byte[] Assemble(Section section, Dictionary<string, Address> resolvedLabels)
+        {
+            byte opCode = 0x30;
+            var modRM = Mod.RegisterDirect.ApplyOperand1(Source).ApplyOperand2(Destination);
+            return [opCode, modRM];
+        }
+
+        public override uint GetSizeOnDisk() => 2;
+        public override uint GetVirtualSize() => 2;
     }
 }

@@ -1,4 +1,9 @@
-﻿namespace Assembler.Core.Models
+﻿using Assembler.Core.Constants;
+using Assembler.Core.Extensions;
+using Assembler.Core.PortableExecutable;
+using Microsoft.Win32;
+
+namespace Assembler.Core.Models
 {
     public class SymbolOffset : IOffset
     {
@@ -31,5 +36,21 @@
         }
 
         public IOffset ToByteOffset() => new SymbolOffset_Byte(Symbol, Offset);
+
+        public byte[] EncodeAsRM(X86Register reg, Address address)
+        {
+            return Mod.MemoryModeNoDisplacement.ApplyOperand1(reg).ApplyOperand2(X86Register.ebp).Encode(address.VirtualAddress.ToBytes());
+        }
+
+        public byte[] EncodeAsRM(X86ByteRegister reg, Address address)
+        {
+            return Mod.MemoryModeNoDisplacement.ApplyOperand1(reg).ApplyOperand2(X86Register.ebp).Encode(address.VirtualAddress.ToBytes());
+        }
+
+        public byte[] EncodeAsRM(Address address)
+        {
+            // No register operand 
+            return Mod.MemoryModeNoDisplacement.ApplyOperand2(X86Register.ebp).Encode(address.VirtualAddress.ToBytes());
+        }
     }
 }

@@ -1,5 +1,7 @@
 ﻿using Assembler.Core.Constants;
+using Assembler.Core.Extensions;
 using Assembler.Core.Models;
+using Assembler.Core.PortableExecutable;
 
 namespace Assembler.Core.Instructions
 {
@@ -16,5 +18,15 @@ namespace Assembler.Core.Instructions
         {
             return $"idiv {Divisor}";
         }
+
+        public override byte[] Assemble(Section section, Dictionary<string, Address> resolvedLabels)
+        {
+            byte opCode = 0xF7;
+            //Here edi is 111 which is opcode extension 7
+            return opCode.Encode(Divisor.EncodeAsRM(X86Register.edi));
+        }
+
+        public override uint GetVirtualSize() => 1 + (uint)Divisor.EncodeAsRM(X86Register.edi).Length;
+        public override uint GetSizeOnDisk() => 1 + (uint)Divisor.EncodeAsRM(X86Register.edi).Length;
     }
 }
