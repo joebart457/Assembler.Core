@@ -1,5 +1,6 @@
-﻿
-using Assembler.Core.Models;
+﻿using Assembler.Core.Models;
+using Assembler.Core.PortableExecutable;
+using Assembler.Core.PortableExecutable.Models;
 
 namespace Assembler.Core.Instructions
 {
@@ -9,5 +10,14 @@ namespace Assembler.Core.Instructions
         {
             return $"cdq";
         }
+
+        public override byte[] Assemble(Section section, uint absoluteInstructionPointer, Dictionary<string, Address> resolvedLabels)
+        {
+            byte opCode = 0x99;
+            return [opCode];
+        }
+
+        public override uint GetSizeOnDisk() => 1;
+        public override uint GetVirtualSize() => 1;
     }
 }

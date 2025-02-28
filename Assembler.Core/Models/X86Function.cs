@@ -32,9 +32,9 @@ public class X86Function
     public string Emit(int indentLevel)
     {
         var sb = new StringBuilder();
-        sb.AppendLine($"{GetDecoratedFunctionLabel()}:".Indent(indentLevel + 1));
         foreach (var instruction in Instructions)
         {
+            if (instruction == Instructions.First()) sb.AppendLine(instruction.Emit().Indent(indentLevel + 1)); // only indent function label once
             sb.AppendLine(instruction.Emit().Indent(indentLevel + 2));
         }
         return sb.ToString();
