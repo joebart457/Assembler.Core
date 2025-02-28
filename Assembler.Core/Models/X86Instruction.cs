@@ -1,5 +1,6 @@
 ﻿using Assembler.Core.Instructions;
 using Assembler.Core.PortableExecutable;
+using Assembler.Core.PortableExecutable.Models;
 
 namespace Assembler.Core.Models
 {

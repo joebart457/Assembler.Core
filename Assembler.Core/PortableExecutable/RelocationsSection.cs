@@ -1,22 +1,19 @@
 ﻿using Assembler.Core.Extensions;
-
+using Assembler.Core.PortableExecutable.Constants;
+using Assembler.Core.PortableExecutable.Models;
 using System.Text;
 
 namespace Assembler.Core.PortableExecutable;
 
-public class RelocationSection : Section
+public class RelocationsSection : Section
 {
     public override byte[] Name => ".reloc".GetBytes(8);
-    public List<BaseRelocationBlock> Blocks { get; set; }
+    public List<BaseRelocationBlock> Blocks { get; set; } = new();
 
     public override uint VirtualSize => (uint)Blocks.Sum(x => x.BlockSize) + (uint)DataInstructions.Sum(x => x.GetVirtualSize());
     public override uint Characteristics => SectionCharacteristics.ContainsInitializedData | SectionCharacteristics.MemDiscardable | SectionCharacteristics.MemRead;
 
     public override uint RawInstructionSize => (uint)Blocks.Sum(x => x.BlockSize);
-    public RelocationSection(List<BaseRelocationBlock> blocks)
-    {
-        Blocks = blocks;
-    }
 
     public override List<byte> Assemble(Dictionary<string, Address> resolvedLabels)
     {

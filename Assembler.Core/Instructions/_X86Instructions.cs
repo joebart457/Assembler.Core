@@ -104,4 +104,10 @@ public static class X86Instructions
     public static Divss_Register_RegisterOffset Divss(XmmRegister destination, RegisterOffset source) => new Divss_Register_RegisterOffset(destination, source);
     public static Cvtsi2ss_Register_RegisterOffset Cvtsi2ss(XmmRegister destination, RegisterOffset source) => new Cvtsi2ss_Register_RegisterOffset(destination, source);
     public static Cvtss2si_Register_RegisterOffset Cvtss2si(X86Register destination, RegisterOffset source) => new Cvtss2si_Register_RegisterOffset(destination, source);
+
+    public static Shl_Register_Immediate Shl(X86Register destination, byte immediateValue) => new Shl_Register_Immediate(destination, immediateValue);
+    public static Shl_RegisterOffset_Immediate Shl(RegisterOffset destination, byte immediateValue) => new Shl_RegisterOffset_Immediate(destination, immediateValue);
+
+    public static Shr_Register_Immediate Shr(X86Register destination, byte immediateValue) => new Shr_Register_Immediate(destination, immediateValue);
+    public static Shr_RegisterOffset_Immediate Shr(RegisterOffset destination, byte immediateValue) => new Shr_RegisterOffset_Immediate(destination, immediateValue);
 }

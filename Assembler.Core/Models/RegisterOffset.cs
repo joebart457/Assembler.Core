@@ -55,7 +55,7 @@ namespace Assembler.Core.Models
             }
             else if (sbyte.MinValue <= Offset && Offset <= sbyte.MaxValue)
             {
-                var disp8 = Convert.ToByte(Offset);
+                var disp8 = (byte)Convert.ToSByte(Offset);
                 if (Register == X86Register.ebp)
                 {
                     return [Mod.MemoryModeWith8BitDisplacement.ApplyOperand1(reg).ApplyOperand2(X86Register.ebp), disp8];
@@ -123,7 +123,7 @@ namespace Assembler.Core.Models
             }
             else if (sbyte.MinValue <= Offset && Offset <= sbyte.MaxValue)
             {
-                var disp8 = Convert.ToByte(Offset);
+                var disp8 = (byte)Convert.ToSByte(Offset);
                 if (Register == X86Register.ebp)
                 {
                     return [Mod.MemoryModeWith8BitDisplacement.ApplyOperand1(reg).ApplyOperand2(X86Register.ebp), disp8];
@@ -178,7 +178,7 @@ namespace Assembler.Core.Models
             }
             else if (sbyte.MinValue <= Offset && Offset <= sbyte.MaxValue)
             {
-                var disp8 = Convert.ToByte(Offset);
+                var disp8 = (byte)Convert.ToSByte(Offset);
                 if (Register == X86Register.ebp)
                 {
                     return [Mod.MemoryModeWith8BitDisplacement.ApplyOperand1(reg).ApplyOperand2(X86Register.ebp), disp8];

@@ -28,7 +28,6 @@ public class X86AssemblyContext
     public List<ByteData> StaticByteData => _byteData;
     public List<PointerData> StaticPointerData => _pointerData;
     public List<UnitializedData> StaticUnitializedData => _unitializedData;
-    public IconData? ProgramIcon { get; set; }
     public List<X86Function> FunctionData { get; private set; } = new();
     public List<ImportLibrary> ImportLibraries { get; private set; } = new();
     public OutputTarget OutputTarget { get; set; }
@@ -36,7 +35,7 @@ public class X86AssemblyContext
     public X86Function GetEntryPoint() => EntryPoint ?? throw new InvalidOperationException("entry point has not been defined");
     public string GetExportFileName() => _exportFileName ?? throw new InvalidOperationException("export filepath was not defined");
     public string? OutputToFile(string outputFilePath) => X86AssemblyGenerator.OutputToFile(this, outputFilePath);
-    public string? OutputToMemory(out StringBuilder generatedX86Code) => X86AssemblyGenerator.OutputToMemory(this, out generatedX86Code);
+    public string? OutputToMemory(out byte[] generatedX86Code) => X86AssemblyGenerator.OutputToMemory(this, out generatedX86Code);
     public void SetOutputTarget(OutputTarget target)
     {
         OutputTarget = target;
@@ -163,6 +162,7 @@ public class X86AssemblyContext
     {
         if (_currentFunctionTarget != null) throw new InvalidOperationException();
         _currentFunctionTarget = function;
+        AddInstruction(new Label(_currentFunctionTarget.GetDecoratedFunctionLabel()));
         FunctionData.Add(_currentFunctionTarget);
     }
 
@@ -213,13 +213,6 @@ public class X86AssemblyContext
         if (_loopLabels.Count == 0) throw new InvalidOperationException();
         return _loopLabels.Peek().continueLabel;
     }
-
-    public void SetProgramIcon(string iconFilePath)
-    {
-        if (ProgramIcon != null) throw new InvalidOperationException("program icon must only be defined once");
-        ProgramIcon = new IconData(iconFilePath);
-    }
-
 
     #region Instructions
 
@@ -362,7 +355,11 @@ public class X86AssemblyContext
     public Divss_Register_RegisterOffset Divss(XmmRegister destination, RegisterOffset source) => CurrentFunction.AddInstruction(new Divss_Register_RegisterOffset(destination, source));
     public Cvtsi2ss_Register_RegisterOffset Cvtsi2ss(XmmRegister destination, RegisterOffset source) => CurrentFunction.AddInstruction(new Cvtsi2ss_Register_RegisterOffset(destination, source));
     public Cvtss2si_Register_RegisterOffset Cvtss2si(X86Register destination, RegisterOffset source) => CurrentFunction.AddInstruction(new Cvtss2si_Register_RegisterOffset(destination, source));
+    public Shl_Register_Immediate Shl(X86Register destination, byte immediateValue) => CurrentFunction.AddInstruction(new Shl_Register_Immediate(destination, immediateValue));
+    public Shl_RegisterOffset_Immediate Shl(RegisterOffset destination, byte immediateValue) => CurrentFunction.AddInstruction(new Shl_RegisterOffset_Immediate(destination, immediateValue));
 
+    public Shr_Register_Immediate Shr(X86Register destination, byte immediateValue) => CurrentFunction.AddInstruction(new Shr_Register_Immediate(destination, immediateValue));
+    public Shr_RegisterOffset_Immediate Shr(RegisterOffset destination, byte immediateValue) => CurrentFunction.AddInstruction(new Shr_RegisterOffset_Immediate(destination, immediateValue));
 
 
     #endregion
@@ -532,17 +529,6 @@ public class X86AssemblyContext
             return $"{Label} rb {BytesToReserve}".Indent(indentLevel);
         }
     }
-
-    public class IconData
-    {
-        public string FilePath { get; set; }
-
-        public IconData(string filePath)
-        {
-            FilePath = filePath;
-        }
-    }
-
 
     #endregion
 

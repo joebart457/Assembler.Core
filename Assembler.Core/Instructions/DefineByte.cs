@@ -1,5 +1,6 @@
 ﻿using Assembler.Core.Models;
 using Assembler.Core.PortableExecutable;
+using Assembler.Core.PortableExecutable.Models;
 using System.Text;
 
 namespace Assembler.Core.Instructions;
@@ -13,6 +14,8 @@ public class DefineByte: X86Instruction
     {
         DefinedBytes = [value];
     }
+
+
     public DefineByte(byte[] definedBytes)
     {
         DefinedBytes = definedBytes;

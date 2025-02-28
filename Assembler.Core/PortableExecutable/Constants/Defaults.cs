@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Assembler.Core.PortableExecutable
+﻿
+namespace Assembler.Core.PortableExecutable.Constants
 {
     internal static class Defaults
     {
@@ -14,7 +9,7 @@ namespace Assembler.Core.PortableExecutable
         public const ushort Machine = 0x014C; // i386
         public const int SectionAlignment = 0x00001000; // 4096
         public const int FileAlignment = 0x00000200; // 512
-        public const uint PageSize = 0x00001000; 
+        public const uint PageSize = 0x00001000;
         public const int ImageBase = 0x00400000;
         public const int OperatingSystemVersion = 0x00000001; // 1.0
         public const int ImageVersion = 0x00000000; // 0

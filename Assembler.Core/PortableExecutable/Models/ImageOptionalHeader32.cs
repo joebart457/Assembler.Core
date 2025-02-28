@@ -4,7 +4,7 @@ using System.Reflection.PortableExecutable;
 using System.Runtime.InteropServices;
 
 [StructLayout(LayoutKind.Sequential, Pack = 1)]
-public class IMAGE_OPTIONAL_HEADER32
+public class ImageOptionalHeader32
 {
     public UInt16 Magic;
     public Byte MajorLinkerVersion;
@@ -37,22 +37,22 @@ public class IMAGE_OPTIONAL_HEADER32
     public UInt32 LoaderFlags;
     public UInt32 NumberOfDataDirectories;           
 
-    public IMAGE_DATA_DIRECTORY ExportTable = IMAGE_DATA_DIRECTORY.Zero;
-    public IMAGE_DATA_DIRECTORY ImportTable = IMAGE_DATA_DIRECTORY.Zero;
-    public IMAGE_DATA_DIRECTORY ResourceTable = IMAGE_DATA_DIRECTORY.Zero;
-    public IMAGE_DATA_DIRECTORY ExceptionTable = IMAGE_DATA_DIRECTORY.Zero;
-    public IMAGE_DATA_DIRECTORY CertificateTable = IMAGE_DATA_DIRECTORY.Zero;
-    public IMAGE_DATA_DIRECTORY BaseRelocationTable = IMAGE_DATA_DIRECTORY.Zero;
-    public IMAGE_DATA_DIRECTORY Debug = IMAGE_DATA_DIRECTORY.Zero;
-    public IMAGE_DATA_DIRECTORY Architecture = IMAGE_DATA_DIRECTORY.Zero;
-    public IMAGE_DATA_DIRECTORY GlobalPtr = IMAGE_DATA_DIRECTORY.Zero;
-    public IMAGE_DATA_DIRECTORY TLSTable = IMAGE_DATA_DIRECTORY.Zero;
-    public IMAGE_DATA_DIRECTORY LoadConfigTable = IMAGE_DATA_DIRECTORY.Zero;
-    public IMAGE_DATA_DIRECTORY BoundImport = IMAGE_DATA_DIRECTORY.Zero;
-    public IMAGE_DATA_DIRECTORY IAT = IMAGE_DATA_DIRECTORY.Zero;
-    public IMAGE_DATA_DIRECTORY DelayImportDescriptor = IMAGE_DATA_DIRECTORY.Zero;
-    public IMAGE_DATA_DIRECTORY CLRRuntimeHeader = IMAGE_DATA_DIRECTORY.Zero;
-    public IMAGE_DATA_DIRECTORY Reserved = IMAGE_DATA_DIRECTORY.Zero;
+    public ImageDataDirectory ExportTable = ImageDataDirectory.Zero;
+    public ImageDataDirectory ImportTable = ImageDataDirectory.Zero;
+    public ImageDataDirectory ResourceTable = ImageDataDirectory.Zero;
+    public ImageDataDirectory ExceptionTable = ImageDataDirectory.Zero;
+    public ImageDataDirectory CertificateTable = ImageDataDirectory.Zero;
+    public ImageDataDirectory BaseRelocationTable = ImageDataDirectory.Zero;
+    public ImageDataDirectory Debug = ImageDataDirectory.Zero;
+    public ImageDataDirectory Architecture = ImageDataDirectory.Zero;
+    public ImageDataDirectory GlobalPtr = ImageDataDirectory.Zero;
+    public ImageDataDirectory TLSTable = ImageDataDirectory.Zero;
+    public ImageDataDirectory LoadConfigTable = ImageDataDirectory.Zero;
+    public ImageDataDirectory BoundImport = ImageDataDirectory.Zero;
+    public ImageDataDirectory IAT = ImageDataDirectory.Zero;
+    public ImageDataDirectory DelayImportDescriptor = ImageDataDirectory.Zero;
+    public ImageDataDirectory CLRRuntimeHeader = ImageDataDirectory.Zero;
+    public ImageDataDirectory Reserved = ImageDataDirectory.Zero;
 
     public List<byte> GetBytes()
     {

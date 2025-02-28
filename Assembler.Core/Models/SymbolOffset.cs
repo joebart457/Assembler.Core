@@ -1,6 +1,6 @@
 ﻿using Assembler.Core.Constants;
 using Assembler.Core.Extensions;
-using Assembler.Core.PortableExecutable;
+using Assembler.Core.PortableExecutable.Models;
 using Microsoft.Win32;
 
 namespace Assembler.Core.Models

@@ -2,6 +2,7 @@
 using Assembler.Core.Extensions;
 using Assembler.Core.Models;
 using Assembler.Core.PortableExecutable;
+using Assembler.Core.PortableExecutable.Models;
 
 namespace Assembler.Core.Instructions
 {
@@ -43,7 +44,7 @@ namespace Assembler.Core.Instructions
 
         public override string Emit()
         {
-            return $"movsx {Destination}, {Source}";
+            return $"movsx {Destination}, byte {Source}";
         }
 
         public override byte[] Assemble(Section section, uint absoluteInstructionPointer, Dictionary<string, Address> resolvedLabels)
@@ -68,7 +69,7 @@ namespace Assembler.Core.Instructions
 
         public override string Emit()
         {
-            return $"movsx {Destination}, {Source}";
+            return $"movsx {Destination}, byte {Source}";
         }
 
         public override byte[] Assemble(Section section, uint absoluteInstructionPointer, Dictionary<string, Address> resolvedLabels)
@@ -94,7 +95,7 @@ namespace Assembler.Core.Instructions
 
         public override string Emit()
         {
-            return $"movzx {Destination}, {Source}";
+            return $"movzx {Destination}, byte {Source}";
         }
 
         public override byte[] Assemble(Section section, uint absoluteInstructionPointer, Dictionary<string, Address> resolvedLabels)

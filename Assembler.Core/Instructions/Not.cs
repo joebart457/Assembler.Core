@@ -4,6 +4,7 @@ using Assembler.Core.Constants;
 using Assembler.Core.Extensions;
 using Assembler.Core.Models;
 using Assembler.Core.PortableExecutable;
+using Assembler.Core.PortableExecutable.Models;
 
 namespace Assembler.Core.Instructions
 {

@@ -1,127 +1,149 @@
 ﻿using Assembler.Core.Constants;
-using Assembler.Core.Extensions;
-using System.Text;
+using Assembler.Core.Instructions;
+using Assembler.Core.Models;
+
+
 
 namespace Assembler.Core;
 
 public static class X86AssemblyGenerator
 {
-    public static string? OutputToFile(X86AssemblyContext assemblyContext, string assemblyOutputPath)
+    public static string? OutputToFile(X86AssemblyContext assemblyContext, string pathToFinalBinary)
     {
         var errorMessage = OutputX86Assembly(assemblyContext, out var generatedCode);
         if (errorMessage != null) return errorMessage;
-        File.WriteAllText(assemblyOutputPath, generatedCode.ToString());
+        File.WriteAllBytes(pathToFinalBinary, generatedCode);
         return null;
     }
 
-    public static string? OutputToMemory(X86AssemblyContext assemblyContext, out StringBuilder generatedX86Code)
+    public static string? OutputToMemory(X86AssemblyContext assemblyContext, out byte[] generatedPEFileBytes)
     {
-        var errorMessage = OutputX86Assembly(assemblyContext, out generatedX86Code);
+        var errorMessage = OutputX86Assembly(assemblyContext, out generatedPEFileBytes);
         return errorMessage;
     }
 
-    private static string? OutputX86Assembly(X86AssemblyContext assemblyContext, out StringBuilder generatedX86Code)
+    private static string? OutputX86Assembly(X86AssemblyContext assemblyContext, out byte[] generatedPEFileBytes)
     {
-        var sb = new StringBuilder();
+        var peFile = new PEFile();
 
         if (assemblyContext.OutputTarget == OutputTarget.Exe)
         {
-            sb.AppendLine("format PE console");
             if (assemblyContext.EntryPoint == null)
                 assemblyContext.SetEntryPoint("Main");
+            peFile.MarkAsExe();
         }
         else if (assemblyContext.OutputTarget == OutputTarget.Dll)
         {
-            sb.AppendLine("format PE DLL");
             if (assemblyContext.EntryPoint == null)
                 assemblyContext.SetEntryPoint("DllEntryPoint");
+            peFile.MarkAsDLL();
+
         }
-        else throw new Exception($"unable to generate code for output target {assemblyContext.OutputTarget}");
+        else throw new Exception($"unable to generate binary for output target {assemblyContext.OutputTarget}");
 
-        sb.AppendLine($"entry {assemblyContext.GetEntryPoint().GetDecoratedFunctionLabel()}");
 
-        // Output static data
-        sb.AppendLine("section '.data' data readable writeable".Indent(0));
+        // Add static data
         foreach (var stringData in assemblyContext.StaticStringData)
         {
-            sb.AppendLine(stringData.Emit(1));
+            peFile.DataSection
+                .AddInstruction(new Label(stringData.Label))
+                .AddInstruction(new DefineByte(stringData.Value));
         }
 
         foreach (var floatingPointData in assemblyContext.StaticFloatingPointData)
         {
-            sb.AppendLine(floatingPointData.Emit(1));
+            peFile.DataSection
+                .AddInstruction(new Label(floatingPointData.Label))
+                .AddInstruction(new DefineByte(BitConverter.GetBytes(floatingPointData.Value)));
         }
 
         foreach (var integerData in assemblyContext.StaticIntegerData)
         {
-            sb.AppendLine(integerData.Emit(1));
+            peFile.DataSection
+                .AddInstruction(new Label(integerData.Label))
+                .AddInstruction(new DefineByte(BitConverter.GetBytes(integerData.Value)));
         }
 
         foreach (var byteData in assemblyContext.StaticByteData)
         {
-            sb.AppendLine(byteData.Emit(1));
+            peFile.DataSection
+                .AddInstruction(new Label(byteData.Label))
+                .AddInstruction(new DefineByte(byteData.Value));
         }
 
         foreach (var pointerData in assemblyContext.StaticPointerData)
         {
-            sb.AppendLine(pointerData.Emit(1));
+            peFile.DataSection
+                .AddInstruction(new Label(pointerData.Label))
+                .AddInstruction(new DefineByte(BitConverter.GetBytes(pointerData.Value)));
         }
 
         foreach (var unitializedData in assemblyContext.StaticUnitializedData)
         {
-            sb.AppendLine(unitializedData.Emit(1));
+            peFile.CreateBssSection()
+                .AddInstruction(new Label(unitializedData.Label))
+                .AddInstruction(new ReserveByte(unitializedData.BytesToReserve));
         }
 
-        // Output User Functions
-        sb.AppendLine("section '.text' code readable executable");
+        // Add User Functions
         foreach (var proc in assemblyContext.FunctionData)
         {
-            sb.Append(proc.Emit(1));
+            foreach(var instruction in proc.Instructions)
+            {
+                peFile.CodeSection.AddInstruction(instruction);
+            }
         }
 
         if (assemblyContext.ImportLibraries.Any())
         {
-            // Output imported functions
-            sb.AppendLine("section '.idata' import data readable writeable");
+            // Add imported functions
             int libCounter = 0;
             foreach (var importLibrary in assemblyContext.ImportLibraries)
             {
-                sb.AppendLine($"dd !lib_{libCounter}_ilt,0,0,RVA !lib_{libCounter}_name, RVA !lib_{libCounter}_iat".Indent(1));
+                peFile.ImportsSection.AddInstruction(new DefineDoubleWord_Rva(Rva.Create($"%ilt_{libCounter}")));
+                peFile.ImportsSection.AddInstruction(new DefineDoubleWord(0));
+                peFile.ImportsSection.AddInstruction(new DefineDoubleWord(0));
+                peFile.ImportsSection.AddInstruction(new DefineDoubleWord_Rva(Rva.Create($"%libpath_{libCounter}")));
+                peFile.ImportsSection.AddInstruction(new DefineDoubleWord_Rva(Rva.Create($"%iat_{libCounter}")));
                 libCounter++;
             }
-            sb.AppendLine($"dd 0,0,0,0,0".Indent(1));
+            peFile.ImportsSection.AddInstruction(new DefineDoubleWord([0, 0, 0, 0, 0]));
             libCounter = 0;
             foreach (var importLibrary in assemblyContext.ImportLibraries)
             {
-                sb.AppendLine($"!lib_{libCounter}_name db '{importLibrary.LibraryPath}',0".Indent(1));
-                sb.AppendLine("rb RVA $ and 1".Indent(1));
+                peFile.ImportsSection.AddInstruction(new Label($"%libpath_{libCounter}"));
+                peFile.ImportsSection.AddInstruction(new DefineByte(importLibrary.LibraryPath));
+                if (peFile.ImportsSection.VirtualSize % 2 == 1) peFile.ImportsSection.AddInstruction(new DefineByte(0));
                 libCounter++;
             }
 
             libCounter = 0;
             foreach (var importLibrary in assemblyContext.ImportLibraries)
             {
-                sb.AppendLine("rb(-rva $) and 3".Indent(1));
 
-                sb.AppendLine($"!lib_{libCounter}_ilt:".Indent(1));
+                peFile.ImportsSection.AddInstruction(new Label($"%ilt_{libCounter}"));
+
                 foreach (var importedFunction in importLibrary.ImportedFunctions)
                 {
-                    sb.AppendLine($"dd RVA !{importedFunction.FunctionIdentifier}".Indent(1));
+                    peFile.ImportsSection.AddInstruction(new DefineDoubleWord_Rva(Rva.Create($"%int_{libCounter}_{importedFunction.FunctionIdentifier}")));
+                }  
+                peFile.ImportsSection.AddInstruction(new DefineDoubleWord(0));
+
+                peFile.ImportsSection.AddInstruction(new Label($"%iat_{libCounter}"));
+                foreach (var importedFunction in importLibrary.ImportedFunctions)
+                {
+                    peFile.ImportsSection.AddInstruction(new Label(importedFunction.FunctionIdentifier));
+                    peFile.ImportsSection.AddInstruction(new DefineDoubleWord_Rva(Rva.Create($"%int_{libCounter}_{importedFunction.FunctionIdentifier}")));
                 }
-                sb.AppendLine($"dd 0".Indent(1));
-
-                sb.AppendLine($"!lib_{libCounter}_iat:".Indent(1));
-                foreach (var importedFunction in importLibrary.ImportedFunctions)
-                {
-                    sb.AppendLine($"{importedFunction.FunctionIdentifier} dd RVA !{importedFunction.FunctionIdentifier}".Indent(1));
-                }
-                sb.AppendLine($"dd 0".Indent(1));
+                peFile.ImportsSection.AddInstruction(new DefineDoubleWord(0));
 
                 foreach (var importedFunction in importLibrary.ImportedFunctions)
                 {
-                    sb.AppendLine($"!{importedFunction.FunctionIdentifier} dw 0".Indent(1));
-                    sb.AppendLine($"db '{importedFunction.Symbol}',0".Indent(1));
-                    if (importedFunction != importLibrary.ImportedFunctions.Last()) sb.AppendLine("rb RVA $ and 1".Indent(1));
+                    peFile.ImportsSection.AddInstruction(new Label($"%int_{libCounter}_{importedFunction.FunctionIdentifier}"));
+                    peFile.ImportsSection.AddInstruction(new DefineByte(0));
+                    peFile.ImportsSection.AddInstruction(new DefineByte(0));
+                    peFile.ImportsSection.AddInstruction(new DefineByte(importedFunction.Symbol));
+                    if (peFile.ImportsSection.VirtualSize % 2 == 1) peFile.ImportsSection.AddInstruction(new DefineByte(0));
                 }
 
                 libCounter++;
@@ -129,87 +151,60 @@ public static class X86AssemblyGenerator
         }
 
 
-
-
-        // Output exported user functions
-        if (assemblyContext.OutputTarget == OutputTarget.Dll)
+        // Add exported user functions
+        if (assemblyContext.ExportedFunctions.Any())
         {
-            sb.AppendLine("section '.edata' export data readable");
+            peFile.CreateExportsSection();
 
-            sb.AppendLine($"dd 0,0,0, RVA !lib_name, 1".Indent(1));
-            sb.AppendLine($"dd {assemblyContext.ExportedFunctions.Count},{assemblyContext.ExportedFunctions.Count}, RVA !exported_addresses, RVA !exported_names, RVA !exported_ordinals".Indent(1));
+            peFile.CreateExportsSection()
+                .AddInstruction(new DefineDoubleWord(0))
+                .AddInstruction(new DefineDoubleWord(0))
+                .AddInstruction(new DefineDoubleWord(0))
+                .AddInstruction(new DefineDoubleWord_Rva(Rva.Create("%library_name")))
+                .AddInstruction(new DefineDoubleWord(1));
 
-            sb.AppendLine($"!exported_addresses:".Indent(1));
+            peFile.ExportsSection!
+                .AddInstruction(new DefineDoubleWord(assemblyContext.ExportedFunctions.Count))
+                .AddInstruction(new DefineDoubleWord(assemblyContext.ExportedFunctions.Count))
+                .AddInstruction(new DefineDoubleWord_Rva(Rva.Create("%exported_addresses")))
+                .AddInstruction(new DefineDoubleWord_Rva(Rva.Create("%exported_names")))
+                .AddInstruction(new DefineDoubleWord_Rva(Rva.Create("%exported_ordinals")));
+
+            peFile.ExportsSection!.AddInstruction(new Label("%exported_addresses"));
             foreach (var exportedFunction in assemblyContext.ExportedFunctions)
             {
-                sb.AppendLine($"dd RVA {exportedFunction.functionIdentifier}".Indent(2));
+                peFile.ExportsSection!.AddInstruction(new DefineDoubleWord_Rva(Rva.Create(exportedFunction.functionIdentifier)));
             }
 
-            sb.AppendLine($"!exported_names:".Indent(1));
+            peFile.ExportsSection!.AddInstruction(new Label("%exported_names"));
             int exportedNamesCounter = 0;
             foreach (var exportedFunction in assemblyContext.ExportedFunctions)
             {
-                sb.AppendLine($"dd RVA !exported_{exportedNamesCounter}".Indent(2));
+                peFile.ExportsSection!.AddInstruction(new Label($"%exported_{exportedNamesCounter}"));
                 exportedNamesCounter++;
             }
             exportedNamesCounter = 0;
-            sb.AppendLine($"!exported_ordinals:".Indent(1));
+            peFile.ExportsSection!.AddInstruction(new Label("%exported_ordinals"));
             foreach (var exportedFunction in assemblyContext.ExportedFunctions)
             {
-                sb.AppendLine($"dw {exportedNamesCounter}".Indent(2));
+                peFile.ExportsSection!.AddInstruction(new DefineWord((short)exportedNamesCounter));
                 exportedNamesCounter++;
             }
 
             exportedNamesCounter = 0;
-            sb.AppendLine($"!lib_name db '{Path.GetFileName(assemblyContext.GetExportFileName())}',0".Indent(1));
+            peFile.ExportsSection!.AddInstruction(new Label("%library_name"))
+                .AddInstruction(new DefineByte(Path.GetFileName(assemblyContext.GetExportFileName())));
+
             foreach (var exportedFunction in assemblyContext.ExportedFunctions)
             {
-                sb.AppendLine($"!exported_{exportedNamesCounter} db '{exportedFunction.exportedSymbol}',0".Indent(1));
+                peFile.ExportsSection!
+                    .AddInstruction(new Label($"%exported_{exportedNamesCounter}"))
+                    .AddInstruction(new DefineByte(exportedFunction.exportedSymbol));
                 exportedNamesCounter++;
             }
-
-            sb.AppendLine("section '.reloc' fixups data readable discardable");
-            sb.AppendLine("if $= $$".Indent(1));
-            sb.AppendLine($"dd 0,8".Indent(2));
-            sb.AppendLine("end if".Indent(1));
-
-        }
-        else if (assemblyContext.ProgramIcon != null)
-        {
-            // Only include program icon for exe target
-            sb.AppendLine("section '.rsrc'resource data readable");
-            int RT_ICON = 3;
-            int RT_GROUP_ICON = 14;
-            int IDR_ICON = 17;
-            int LANG_NEUTRAL = 0;
-            sb.AppendLine($"root@resource dd 0, %t, 0, 2 shl 16".Indent(1));
-            sb.AppendLine($"dd {RT_ICON}, 80000000h + !icons - root@resource".Indent(1));
-            sb.AppendLine($"dd {RT_GROUP_ICON}, 80000000h + !group_icons - root@resource".Indent(1));
-
-            sb.AppendLine($"!icons:".Indent(1));
-            sb.AppendLine($"dd      0, %t, 0, 1 shl 16".Indent(1));
-            sb.AppendLine($"dd      1, 80000000h + !icon_data.directory - root@resource".Indent(1));
-            sb.AppendLine($"!icon_data.directory dd 0, %t, 0, 10000h, {LANG_NEUTRAL}, !icon_data - root@resource".Indent(1));
-            sb.AppendLine($"!group_icons:".Indent(1));
-            sb.AppendLine($"dd      0, %t, 0, 1 shl 16".Indent(1));
-            sb.AppendLine($"dd {IDR_ICON}, 80000000h + !main_icon.directory - root@resource".Indent(1));
-            sb.AppendLine($"!main_icon.directory dd 0, %t, 0, 10000h, {LANG_NEUTRAL}, !main_icon - root@resource".Indent(1));
-
-            sb.AppendLine($"!icon_data dd RVA !data, !size, 0, 0".Indent(1));
-            sb.AppendLine($"virtual at 0".Indent(1));
-            sb.AppendLine($"file '{assemblyContext.ProgramIcon.FilePath}':6, 16".Indent(1));
-            sb.AppendLine($"load !size dword from 8".Indent(1));
-            sb.AppendLine($"load !position dword from 12".Indent(1));
-            sb.AppendLine($"end virtual".Indent(1));
-            sb.AppendLine($"!data file '{assemblyContext.ProgramIcon.FilePath}':!position, !size".Indent(1));
-            sb.AppendLine($"align 4".Indent(1));
-            sb.AppendLine($"!main_icon dd RVA !header, 6+1*14, 0, 0".Indent(1));
-            sb.AppendLine($"!header dw 0, 1, 1".Indent(1));
-            sb.AppendLine($"file '{assemblyContext.ProgramIcon.FilePath}':6, 12".Indent(1));
-            sb.AppendLine($"dw 1".Indent(1));
         }
 
-        generatedX86Code = sb;
+        generatedPEFileBytes = peFile.AssembleProgram(assemblyContext.GetEntryPoint().GetDecoratedFunctionLabel());
         return null; // return null since there are no errors
     }
 }

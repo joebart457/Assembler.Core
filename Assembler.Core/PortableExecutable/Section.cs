@@ -1,6 +1,8 @@
 ﻿using Assembler.Core.Extensions;
 using Assembler.Core.Instructions;
 using Assembler.Core.Models;
+using Assembler.Core.PortableExecutable.Constants;
+using Assembler.Core.PortableExecutable.Models;
 
 namespace Assembler.Core.PortableExecutable
 {
@@ -34,7 +36,7 @@ namespace Assembler.Core.PortableExecutable
         public virtual uint AbsoluteVirtualAddress => RelativeVirtualAddress + PEFile.OptionalHeader32.ImageBase;
         public virtual uint RawInstructionSize => (uint)DataInstructions.Sum(x => x.GetSizeOnDisk());
         public virtual uint TotalVirtualSize => VirtualSize.RoundUpToNearestMultipleOfFactor(PEFile.OptionalHeader32.SectionAlignment);
-        public IMAGE_SECTION_HEADER ImageSectionHeader => new IMAGE_SECTION_HEADER()
+        public ImageSectionHeader ImageSectionHeader => new ImageSectionHeader()
         {
             Name = Name,
             VirtualSize = VirtualSize,
@@ -48,9 +50,12 @@ namespace Assembler.Core.PortableExecutable
             Characteristics = Characteristics,
         };
 
-        public void AddInstruction(X86Instruction instruction)
+        public ImageDataDirectory ToDataDirectory() => new(RelativeVirtualAddress, RawInstructionSize);
+
+        public Section AddInstruction(X86Instruction instruction)
         {
             DataInstructions.Add(instruction);
+            return this;
         }
 
         public virtual List<byte> Assemble(Dictionary<string, Address> resolvedLabels)
