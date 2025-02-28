@@ -30,7 +30,7 @@ public class X86AssemblyContext
     public List<UnitializedData> StaticUnitializedData => _unitializedData;
     public List<X86Function> FunctionData { get; private set; } = new();
     public List<ImportLibrary> ImportLibraries { get; private set; } = new();
-    public OutputTarget OutputTarget { get; set; }
+    public OutputTarget OutputTarget { get; set; } = OutputTarget.Exe;
     public X86Function? EntryPoint { get; set; }
     public X86Function GetEntryPoint() => EntryPoint ?? throw new InvalidOperationException("entry point has not been defined");
     public string GetExportFileName() => _exportFileName ?? throw new InvalidOperationException("export filepath was not defined");

@@ -1,9 +1,5 @@
 ﻿using Assembler.Core.Extensions;
-using System.Collections.Generic;
-using System.Reflection.PortableExecutable;
-using System.Runtime.InteropServices;
 
-[StructLayout(LayoutKind.Sequential, Pack = 1)]
 public class ImageOptionalHeader32
 {
     public UInt16 Magic;
