@@ -4,10 +4,9 @@
 **X86Assembler.Core** is a C# NuGet package designed to assist developers with turning x86 assembly code into executable files in the PE32 file format.
 
 ## Features
-
-- Support for the most generally used subset of x86 assembly language
-- Output PE32 files (exe and dll)
+- Assemble x86 assembly code to executable PE32 files (exe and dll)
 - Convience methods to make assembly code generation easier
+- Ability to define your own custom x86 assembly instructions
 
 ## NonFeatures
 - No 16 or 64 bit support. This is a 32 bit x86 assembler only.
