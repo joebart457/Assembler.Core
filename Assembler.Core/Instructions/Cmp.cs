@@ -1,5 +1,6 @@
 ﻿using Assembler.Core.Constants;
 using Assembler.Core.Extensions;
+using Assembler.Core.Interfaces;
 using Assembler.Core.Models;
 using Assembler.Core.PortableExecutable;
 using Assembler.Core.PortableExecutable.Models;
@@ -7,7 +8,7 @@ using Assembler.Core.PortableExecutable.Models;
 
 namespace Assembler.Core.Instructions
 {
-    public class Cmp_Register_Register : X86Instruction
+    public class Cmp_Register_Register : X86Instruction, INonAltering_Register_Register
     {
         public X86Register Destination { get; set; }
         public X86Register Source { get; set; }
@@ -33,7 +34,7 @@ namespace Assembler.Core.Instructions
         public override uint GetVirtualSize() => 2;
     }
 
-    public class Cmp_Byte_Byte : X86Instruction
+    public class Cmp_Byte_Byte : X86Instruction, INonAltering_ByteRegister_ByteRegister
     {
         public X86ByteRegister Destination { get; set; }
         public X86ByteRegister Source { get; set; }
@@ -58,19 +59,19 @@ namespace Assembler.Core.Instructions
         public override uint GetVirtualSize() => 2;
     }
 
-    public class Cmp_Register_Immediate : X86Instruction
+    public class Cmp_Register_Immediate : X86Instruction, INonAltering_Register_Immediate
     {
         public X86Register Destination { get; set; }
-        public int Source { get; set; }
-        public Cmp_Register_Immediate(X86Register destination, int source)
+        public int ImmediateValue { get; set; }
+        public Cmp_Register_Immediate(X86Register destination, int immediateValue)
         {
             Destination = destination;
-            Source = source;
+            ImmediateValue = immediateValue;
         }
 
         public override string Emit()
         {
-            return $"cmp {Destination}, {Source}";
+            return $"cmp {Destination}, {ImmediateValue}";
         }
 
         public override byte[] Assemble(Section section, uint absoluteInstructionPointer, Dictionary<string, Address> resolvedLabels)
@@ -78,7 +79,7 @@ namespace Assembler.Core.Instructions
             byte opCode = 0x81;
             // here edi as operand1 is 111 the opcode extension for cmp
             var modRM = Mod.RegisterDirect.ApplyOperand1(X86Register.edi).ApplyOperand2(Destination);
-            return new List<byte>() { opCode, modRM }.Concat(Source.ToBytes()).ToArray();
+            return new List<byte>() { opCode, modRM }.Concat(ImmediateValue.ToBytes()).ToArray();
         }
 
         public override uint GetSizeOnDisk() => 6;

@@ -1,12 +1,13 @@
 ﻿using Assembler.Core.Constants;
 using Assembler.Core.Extensions;
+using Assembler.Core.Interfaces;
 using Assembler.Core.Models;
 using Assembler.Core.PortableExecutable;
 using Assembler.Core.PortableExecutable.Models;
 
 namespace Assembler.Core.Instructions
 {
-    public class Inc_Register : X86Instruction
+    public class Inc_Register : X86Instruction, IRegister_Destination
     {
         public X86Register Destination { get; set; }
 
@@ -29,7 +30,7 @@ namespace Assembler.Core.Instructions
         public override uint GetVirtualSize() => 1;
         public override uint GetSizeOnDisk() => 1;
     }
-    public class Dec_Register : X86Instruction
+    public class Dec_Register : X86Instruction, IRegister_Destination
     {
         public X86Register Destination { get; set; }
 
@@ -53,7 +54,7 @@ namespace Assembler.Core.Instructions
         public override uint GetSizeOnDisk() => 1;
     }
 
-    public class Inc_RegisterOffset : X86Instruction
+    public class Inc_RegisterOffset : X86Instruction, IRegisterOffset_Destination
     {
         public RegisterOffset Destination { get; set; }
 
@@ -79,7 +80,7 @@ namespace Assembler.Core.Instructions
         public override uint GetSizeOnDisk() => 2;
     }
 
-    public class Dec_RegisterOffset : X86Instruction
+    public class Dec_RegisterOffset : X86Instruction, IRegisterOffset_Destination
     {
         public RegisterOffset Destination { get; set; }
 

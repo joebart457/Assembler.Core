@@ -1,12 +1,13 @@
 ﻿using Assembler.Core.Constants;
 using Assembler.Core.Extensions;
+using Assembler.Core.Interfaces;
 using Assembler.Core.Models;
 using Assembler.Core.PortableExecutable;
 using Assembler.Core.PortableExecutable.Models;
 
 namespace Assembler.Core.Instructions
 {
-    public class Mov_Register_RegisterOffset : X86Instruction
+    public class Mov_Register_RegisterOffset : X86Instruction, IRegister_RegisterOffset
     {
         public X86Register Destination { get; set; }
         public RegisterOffset Source { get; set; }
@@ -30,7 +31,7 @@ namespace Assembler.Core.Instructions
         public override uint GetVirtualSize() => 1 + (uint)Source.EncodeAsRM(Destination).Length;
     }
 
-    public class Mov_RegisterOffset_Register : X86Instruction
+    public class Mov_RegisterOffset_Register : X86Instruction, IRegisterOffset_Register
     {
         public RegisterOffset Destination { get; set; }
         public X86Register Source { get; set; }
@@ -55,7 +56,7 @@ namespace Assembler.Core.Instructions
         public override uint GetVirtualSize() => 1 + (uint)Destination.EncodeAsRM(Source).Length;
     }
 
-    public class Mov_Register_Register : X86Instruction
+    public class Mov_Register_Register : X86Instruction, IRegister_Register
     {
         public X86Register Destination { get; set; }
         public X86Register Source { get; set; }
@@ -82,7 +83,7 @@ namespace Assembler.Core.Instructions
         public override uint GetVirtualSize() => 2;
     }
 
-    public class Mov_Register_Immediate : X86Instruction
+    public class Mov_Register_Immediate : X86Instruction, IRegister_Immediate
     {
         public X86Register Destination { get; set; }
         public int ImmediateValue { get; set; }
@@ -108,34 +109,35 @@ namespace Assembler.Core.Instructions
 
     }
 
-    public class Mov_RegisterOffset_Immediate : X86Instruction
+    public class Mov_RegisterOffset_Immediate : X86Instruction, IRegisterOffset_Immediate
     {
         public RegisterOffset Destination { get; set; }
-        public int Immediate { get; set; }
-        public Mov_RegisterOffset_Immediate(RegisterOffset destination, int immediate)
+        public int ImmediateValue { get; set; }
+        public Mov_RegisterOffset_Immediate(RegisterOffset destination, int immediateValue)
         {
             Destination = destination;
-            Immediate = immediate;
+            ImmediateValue = immediateValue;
         }
 
         public override string Emit()
         {
-            return $"mov {Destination}, {Immediate}";
+            return $"mov {Destination}, {ImmediateValue}";
         }
 
         public override byte[] Assemble(Section section, uint absoluteInstructionPointer, Dictionary<string, Address> resolvedLabels)
         {
             byte opCode = 0xC7;
+            // here eax is opcode extension 0
             return opCode
-                .Encode(Destination.EncodeAsRM((byte)0b00_000_000))
-                .Concat(Immediate.ToBytes()).ToArray();
+                .Encode(Destination.EncodeAsRM(X86Register.eax))
+                .Concat(ImmediateValue.ToBytes()).ToArray();
         }
 
-        public override uint GetSizeOnDisk() => 5 + (uint)Destination.EncodeAsRM((byte)0b00_000_000).Length;
-        public override uint GetVirtualSize() => 5 + (uint)Destination.EncodeAsRM((byte)0b00_000_000).Length;
+        public override uint GetSizeOnDisk() => 5 + (uint)Destination.EncodeAsRM(X86Register.eax).Length;
+        public override uint GetVirtualSize() => 5 + (uint)Destination.EncodeAsRM(X86Register.eax).Length;
     }
 
-    public class Mov_SymbolOffset_Register : X86Instruction
+    public class Mov_SymbolOffset_Register : X86Instruction, ISymbolOffset_Register
     {
         public SymbolOffset Destination { get; set; }
         public X86Register Source { get; set; }
@@ -156,11 +158,16 @@ namespace Assembler.Core.Instructions
             return opCode.Encode(Destination.EncodeAsRM(Source, address));
         }
 
+        public override void AddRelocationEntry(BaseRelocationBlock baseRelocationBlock, ushort currentVirtualOffsetFromSectionStart)
+        {
+            baseRelocationBlock.AddEntry(currentVirtualOffsetFromSectionStart + ((ushort)GetVirtualSize() - 4)); // symbol address is placed at last 4 bytes of instruction encoding
+        }
+
         public override uint GetSizeOnDisk() => 6;
         public override uint GetVirtualSize() => 6;
     }
 
-    public class Mov_SymbolOffset_Immediate : X86Instruction
+    public class Mov_SymbolOffset_Immediate : X86Instruction, ISymbolOffset_Immediate
     {
         public SymbolOffset Destination { get; set; }
         public int ImmediateValue { get; set; }
@@ -183,12 +190,17 @@ namespace Assembler.Core.Instructions
             return opCode.Encode(Destination.EncodeAsRM(address)).Concat(ImmediateValue.ToBytes()).ToArray();
         }
 
+        public override void AddRelocationEntry(BaseRelocationBlock baseRelocationBlock, ushort currentVirtualOffsetFromSectionStart)
+        {
+            baseRelocationBlock.AddEntry(currentVirtualOffsetFromSectionStart + 2); 
+        }
+
         public override uint GetSizeOnDisk() => 10;
         public override uint GetVirtualSize() => 10;
 
     }
 
-    public class Mov_SymbolOffset_ByteRegister : X86Instruction
+    public class Mov_SymbolOffset_ByteRegister : X86Instruction, ISymbolOffset_ByteRegister
     {
         public SymbolOffset Destination { get; set; }
         public X86ByteRegister Source { get; set; }
@@ -211,12 +223,17 @@ namespace Assembler.Core.Instructions
             return opCode.Encode(Destination.EncodeAsRM(Source, address));
         }
 
+        public override void AddRelocationEntry(BaseRelocationBlock baseRelocationBlock, ushort currentVirtualOffsetFromSectionStart)
+        {
+            baseRelocationBlock.AddEntry(currentVirtualOffsetFromSectionStart + ((ushort)GetVirtualSize() - 4)); // symbol address is placed at last 4 bytes of instruction encoding
+        }
+
         public override uint GetSizeOnDisk() => 6;
         public override uint GetVirtualSize() => 6;
     }
 
 
-    public class Mov_RegisterOffset_ByteRegister : X86Instruction
+    public class Mov_RegisterOffset_ByteRegister : X86Instruction, IRegisterOffset_ByteRegister
     {
         public RegisterOffset Destination { get; set; }
         public X86ByteRegister Source { get; set; }

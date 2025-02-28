@@ -16,7 +16,7 @@ namespace Assembler.Core.Models
         public override string ToString()
         {
             var repr = Offset == 0 ? Register.ToString() : $"{Register} {(Offset > 0 ? "+" : "-")} {Math.Abs(Offset)}";
-            return $"dword [{repr}]";
+            return $"[{repr}]";
         }
 
         public override bool Equals(object? obj)
@@ -87,19 +87,6 @@ namespace Assembler.Core.Models
                 }
                 return Mod.MemoryModeWith8BitDisplacement.ApplyOperand1(reg).ApplyOperand2(Register).Encode(disp32);
             }       
-        }
-
-        public byte[] EncodeAsRM(byte extension)
-        {
-            if ((extension & 0b00_000_000) == extension) return EncodeAsRM(X86Register.eax);
-            if ((extension & 0b00_001_000) == extension) return EncodeAsRM(X86Register.ecx);
-            if ((extension & 0b00_010_000) == extension) return EncodeAsRM(X86Register.edx);
-            if ((extension & 0b00_011_000) == extension) return EncodeAsRM(X86Register.ebx);
-            if ((extension & 0b00_100_000) == extension) return EncodeAsRM(X86Register.esp);
-            if ((extension & 0b00_101_000) == extension) return EncodeAsRM(X86Register.ebp);
-            if ((extension & 0b00_110_000) == extension) return EncodeAsRM(X86Register.esi);
-            if ((extension & 0b00_111_000) == extension) return EncodeAsRM(X86Register.edi);
-            throw new InvalidOperationException($"invalid ModR/M extension: {extension}");
         }
 
         public byte[] EncodeAsRM(X86ByteRegister reg)

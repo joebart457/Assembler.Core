@@ -1,11 +1,12 @@
 ﻿using Assembler.Core.Constants;
 using Assembler.Core.Extensions;
+using Assembler.Core.Interfaces;
 using Assembler.Core.Models;
 using Assembler.Core.PortableExecutable;
 using Assembler.Core.PortableExecutable.Models;
 namespace Assembler.Core.Instructions;
 
-public class Movss_RegisterOffset_Register : X86Instruction
+public class Movss_RegisterOffset_Register : X86Instruction, IRegisterOffset_XmmRegister
 {
     public RegisterOffset Destination { get; set; }
     public XmmRegister Source { get; set; }
@@ -30,7 +31,7 @@ public class Movss_RegisterOffset_Register : X86Instruction
     public override uint GetVirtualSize() => 3 + (uint)Destination.EncodeAsRM(Source).Length;
 }
 
-public class Movss_Register_RegisterOffset : X86Instruction
+public class Movss_Register_RegisterOffset : X86Instruction, IXmmRegister_RegisterOffset
 {
     public XmmRegister Destination { get; set; }
     public RegisterOffset Source { get; set; }
@@ -55,7 +56,7 @@ public class Movss_Register_RegisterOffset : X86Instruction
     public override uint GetVirtualSize() => 3 + (uint)Source.EncodeAsRM(Destination).Length;
 }
 
-public class Movss_Register_Register : X86Instruction
+public class Movss_Register_Register : X86Instruction, IXmmRegister_XmmRegister
 {
     public XmmRegister Destination { get; set; }
     public XmmRegister Source { get; set; }
@@ -82,49 +83,49 @@ public class Movss_Register_Register : X86Instruction
 }
 
 
-public class Comiss_Register_RegisterOffset : X86Instruction
+public class Comiss_Register_RegisterOffset : X86Instruction, INonAltering_XmmRegister_RegisterOffset
 {
-    public XmmRegister Operand1 { get; set; }
-    public RegisterOffset Operand2 { get; set; }
-    public Comiss_Register_RegisterOffset(XmmRegister operand1, RegisterOffset operand2)
+    public XmmRegister Destination { get; set; }
+    public RegisterOffset Source { get; set; }
+    public Comiss_Register_RegisterOffset(XmmRegister destination, RegisterOffset source)
     {
-        Operand1 = operand1;
-        Operand2 = operand2;
+        Destination = destination;
+        Source = source;
     }
 
     public override string Emit()
     {
-        return $"comiss {Operand1}, {Operand2}";
+        return $"comiss {Destination}, {Source}";
     }
     public override byte[] Assemble(Section section, uint absoluteInstructionPointer, Dictionary<string, Address> resolvedLabels)
     {
         byte[] opCodes = [0x0F, 0x2F];
-        return opCodes.Concat(Operand2.EncodeAsRM(Operand1)).ToArray();
+        return opCodes.Concat(Source.EncodeAsRM(Destination)).ToArray();
     }
 
-    public override uint GetSizeOnDisk() => 2 + (uint)Operand2.EncodeAsRM(Operand1).Length;
-    public override uint GetVirtualSize() => 2 + (uint)Operand2.EncodeAsRM(Operand1).Length;
+    public override uint GetSizeOnDisk() => 2 + (uint)Source.EncodeAsRM(Destination).Length;
+    public override uint GetVirtualSize() => 2 + (uint)Source.EncodeAsRM(Destination).Length;
 }
 
-public class Comiss_Register_Register : X86Instruction
+public class Comiss_Register_Register : X86Instruction, INonAltering_XmmRegister_XmmRegister
 {
-    public XmmRegister Operand1 { get; set; }
-    public XmmRegister Operand2 { get; set; }
-    public Comiss_Register_Register(XmmRegister operand1, XmmRegister operand2)
+    public XmmRegister Destination { get; set; }
+    public XmmRegister Source { get; set; }
+    public Comiss_Register_Register(XmmRegister destination, XmmRegister source)
     {
-        Operand1 = operand1;
-        Operand2 = operand2;
+        Destination = destination;
+        Source = source;
     }
 
     public override string Emit()
     {
-        return $"comiss {Operand1}, {Operand2}";
+        return $"comiss {Destination}, {Source}";
     }
 
     public override byte[] Assemble(Section section, uint absoluteInstructionPointer, Dictionary<string, Address> resolvedLabels)
     {
         byte[] opCodes = [0x0F, 0x2F];
-        var modRM = Mod.RegisterDirect.ApplyOperand1(Operand1).ApplyOperand2(Operand2);
+        var modRM = Mod.RegisterDirect.ApplyOperand1(Destination).ApplyOperand2(Source);
         return opCodes.Append(modRM).ToArray();
     }
 
@@ -132,25 +133,25 @@ public class Comiss_Register_Register : X86Instruction
     public override uint GetVirtualSize() => 3;
 }
 
-public class Ucomiss_Register_Register : X86Instruction
+public class Ucomiss_Register_Register : X86Instruction, INonAltering_XmmRegister_XmmRegister
 {
-    public XmmRegister Operand1 { get; set; }
-    public XmmRegister Operand2 { get; set; }
-    public Ucomiss_Register_Register(XmmRegister operand1, XmmRegister operand2)
+    public XmmRegister Destination { get; set; }
+    public XmmRegister Source { get; set; }
+    public Ucomiss_Register_Register(XmmRegister destination, XmmRegister source)
     {
-        Operand1 = operand1;
-        Operand2 = operand2;
+        Destination = destination;
+        Source = source;
     }
 
     public override string Emit()
     {
-        return $"ucomiss {Operand1}, {Operand2}";
+        return $"ucomiss {Destination}, {Source}";
     }
 
     public override byte[] Assemble(Section section, uint absoluteInstructionPointer, Dictionary<string, Address> resolvedLabels)
     {
         byte[] opCodes = [0x0F, 0x2E];
-        var modRM = Mod.RegisterDirect.ApplyOperand1(Operand1).ApplyOperand2(Operand2);
+        var modRM = Mod.RegisterDirect.ApplyOperand1(Destination).ApplyOperand2(Source);
         return opCodes.Append(modRM).ToArray();
     }
 
@@ -158,7 +159,7 @@ public class Ucomiss_Register_Register : X86Instruction
     public override uint GetVirtualSize() => 3;
 }
 
-public class Addss_Register_RegisterOffset : X86Instruction
+public class Addss_Register_RegisterOffset : X86Instruction, IXmmRegister_RegisterOffset
 {
     public XmmRegister Destination { get; set; }
     public RegisterOffset Source { get; set; }
@@ -183,7 +184,7 @@ public class Addss_Register_RegisterOffset : X86Instruction
     public override uint GetVirtualSize() => 3 + (uint)Source.EncodeAsRM(Destination).Length;
 }
 
-public class Subss_Register_RegisterOffset : X86Instruction
+public class Subss_Register_RegisterOffset : X86Instruction, IXmmRegister_RegisterOffset
 {
     public XmmRegister Destination { get; set; }
     public RegisterOffset Source { get; set; }
@@ -208,7 +209,7 @@ public class Subss_Register_RegisterOffset : X86Instruction
     public override uint GetVirtualSize() => 3 + (uint)Source.EncodeAsRM(Destination).Length;
 }
 
-public class Divss_Register_RegisterOffset : X86Instruction
+public class Divss_Register_RegisterOffset : X86Instruction, IXmmRegister_RegisterOffset
 {
     public XmmRegister Destination { get; set; }
     public RegisterOffset Source { get; set; }
@@ -233,7 +234,7 @@ public class Divss_Register_RegisterOffset : X86Instruction
     public override uint GetVirtualSize() => 3 + (uint)Source.EncodeAsRM(Destination).Length;
 }
 
-public class Mulss_Register_RegisterOffset : X86Instruction
+public class Mulss_Register_RegisterOffset : X86Instruction, IXmmRegister_RegisterOffset
 {
     public XmmRegister Destination { get; set; }
     public RegisterOffset Source { get; set; }
@@ -258,7 +259,7 @@ public class Mulss_Register_RegisterOffset : X86Instruction
     public override uint GetVirtualSize() => 3 + (uint)Source.EncodeAsRM(Destination).Length;
 }
 
-public class Cvtsi2ss_Register_RegisterOffset : X86Instruction
+public class Cvtsi2ss_Register_RegisterOffset : X86Instruction, IXmmRegister_RegisterOffset
 {
     public XmmRegister Destination { get; set; }
     public RegisterOffset Source { get; set; }
@@ -283,7 +284,7 @@ public class Cvtsi2ss_Register_RegisterOffset : X86Instruction
     public override uint GetVirtualSize() => 3 + (uint)Source.EncodeAsRM(Destination).Length;
 }
 
-public class Cvtss2si_Register_RegisterOffset : X86Instruction
+public class Cvtss2si_Register_RegisterOffset : X86Instruction, IRegister_RegisterOffset
 {
     public X86Register Destination { get; set; }
     public RegisterOffset Source { get; set; }

@@ -45,6 +45,7 @@ namespace Assembler.Core.Instructions
                 return callInstruction.Encode(offset.ToBytes());
             }
         }
+
     }
 
     public class Call_RegisterOffset : X86Instruction

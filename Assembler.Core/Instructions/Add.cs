@@ -1,39 +1,40 @@
 ﻿using Assembler.Core.Constants;
 using Assembler.Core.Extensions;
+using Assembler.Core.Interfaces;
 using Assembler.Core.Models;
 using Assembler.Core.PortableExecutable;
 using Assembler.Core.PortableExecutable.Models;
 
 namespace Assembler.Core.Instructions
 {
-    public class Add_Register_Immediate : X86Instruction
+    public class Add_Register_Immediate : X86Instruction, IRegister_Immediate
     {
         public X86Register Destination { get; set; }
-        public int ValueToAdd { get; set; }
+        public int ImmediateValue { get; set; }
 
-        public Add_Register_Immediate(X86Register destination, int valueToAdd)
+        public Add_Register_Immediate(X86Register destination, int immediateValue)
         {
             Destination = destination;
-            ValueToAdd = valueToAdd;
+            ImmediateValue = immediateValue;
         }
 
         public override string Emit()
         {
-            return $"add {Destination}, {ValueToAdd}";
+            return $"add {Destination}, {ImmediateValue}";
         }
 
         public override byte[] Assemble(Section section, uint absoluteInstructionPointer, Dictionary<string, Address> resolvedLabels)
         {
             byte opCode = 0x81;
             var modRM = Mod.RegisterDirect.ApplyOperand2(Destination);
-            return new byte[] { opCode, modRM }.Concat(ValueToAdd.ToBytes()).ToArray();
+            return new byte[] { opCode, modRM }.Concat(ImmediateValue.ToBytes()).ToArray();
         }
 
         public override uint GetSizeOnDisk() => 6;
         public override uint GetVirtualSize() => 6;
     }
 
-    public class Add_Register_Register: X86Instruction
+    public class Add_Register_Register: X86Instruction, IRegister_Register
     {
         public X86Register Destination { get; set; }
         public X86Register Source { get; set; }
@@ -60,7 +61,7 @@ namespace Assembler.Core.Instructions
         public override uint GetVirtualSize() => 2;
     }
 
-    public class Add_Register_RegisterOffset : X86Instruction
+    public class Add_Register_RegisterOffset : X86Instruction, IRegister_RegisterOffset
     {
         public X86Register Destination { get; set; }
         public RegisterOffset Source { get; set; }

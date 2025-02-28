@@ -1,12 +1,13 @@
 ﻿using Assembler.Core.Constants;
 using Assembler.Core.Extensions;
+using Assembler.Core.Interfaces;
 using Assembler.Core.Models;
 using Assembler.Core.PortableExecutable;
 using Assembler.Core.PortableExecutable.Models;
 
 namespace Assembler.Core.Instructions
 {
-    public class Lea_Register_RegisterOffset : X86Instruction
+    public class Lea_Register_RegisterOffset : X86Instruction, IRegister_RegisterOffset
     {
         public X86Register Destination { get; set; }
         public RegisterOffset Source { get; set; }
@@ -30,7 +31,7 @@ namespace Assembler.Core.Instructions
         public override uint GetVirtualSize() => 1 + (uint)Source.EncodeAsRM(Destination).Length;
     }
 
-    public class Lea_Register_SymbolOffset : X86Instruction
+    public class Lea_Register_SymbolOffset : X86Instruction, IRegister_SymbolOffset
     {
         public X86Register Destination { get; set; }
         public SymbolOffset Source { get; set; }
@@ -51,6 +52,12 @@ namespace Assembler.Core.Instructions
             byte opCode = 0x8D;
             return opCode.Encode(Source.EncodeAsRM(Destination, address));
         }
+
+        public override void AddRelocationEntry(BaseRelocationBlock baseRelocationBlock, ushort currentVirtualOffsetFromSectionStart)
+        {
+            baseRelocationBlock.AddEntry(currentVirtualOffsetFromSectionStart + ((ushort)GetVirtualSize() - 4)); // symbol address is placed at last 4 bytes of instruction encoding
+        }
+
         public override uint GetSizeOnDisk() => 6;
         public override uint GetVirtualSize() => 6;
     }

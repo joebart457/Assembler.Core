@@ -1,12 +1,13 @@
 ﻿using Assembler.Core.Constants;
 using Assembler.Core.Extensions;
+using Assembler.Core.Interfaces;
 using Assembler.Core.Models;
 using Assembler.Core.PortableExecutable;
 using Assembler.Core.PortableExecutable.Models;
 
 namespace Assembler.Core.Instructions
 {
-    public class Pop_Register : X86Instruction
+    public class Pop_Register : X86Instruction, IRegister_Destination
     {
         public X86Register Destination { get; set; }
 

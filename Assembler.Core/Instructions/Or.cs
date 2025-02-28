@@ -1,12 +1,13 @@
 ﻿using Assembler.Core.Constants;
 using Assembler.Core.Extensions;
+using Assembler.Core.Interfaces;
 using Assembler.Core.Models;
 using Assembler.Core.PortableExecutable;
 using Assembler.Core.PortableExecutable.Models;
 
 namespace Assembler.Core.Instructions
 {
-    public class Or_Register_Register : X86Instruction
+    public class Or_Register_Register : X86Instruction, IRegister_Register
     {
         public X86Register Destination { get; set; }
         public X86Register Source { get; set; }
@@ -33,7 +34,7 @@ namespace Assembler.Core.Instructions
         public override uint GetVirtualSize() => 2;
     }
 
-    public class Or_Register_Register__Byte : X86Instruction
+    public class Or_Register_Register__Byte : X86Instruction, IByteRegister_ByteRegister
     {
         public X86ByteRegister Destination { get; set; }
         public X86ByteRegister Source { get; set; }

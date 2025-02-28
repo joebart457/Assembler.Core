@@ -1,77 +1,83 @@
 ﻿using Assembler.Core.Constants;
 using Assembler.Core.Extensions;
+using Assembler.Core.Interfaces;
 using Assembler.Core.Models;
 using Assembler.Core.PortableExecutable;
 using Assembler.Core.PortableExecutable.Models;
 
 namespace Assembler.Core.Instructions
 {
-    public class Push_Register : X86Instruction
+    public class Push_Register : X86Instruction, IRegister_Source
     {
-        public X86Register Register { get; set; }
-        public Push_Register(X86Register register)
+        public X86Register Source { get; set; }
+        public Push_Register(X86Register source)
         {
-            Register = register;
+            Source = source;
         }
 
         public override string Emit()
         {
-            return $"push {Register}";
+            return $"push {Source}";
         }
 
         public override byte[] Assemble(Section section, uint absoluteInstructionPointer, Dictionary<string, Address> resolvedLabels)
         {
             byte opCode = 0x50;
-            return [opCode.ApplyRegister(Register)];
+            return [opCode.ApplyRegister(Source)];
         }
 
         public override uint GetSizeOnDisk() => 1;
         public override uint GetVirtualSize() => 1;
     }
 
-    public class Push_RegisterOffset : X86Instruction
+    public class Push_RegisterOffset : X86Instruction, IRegisterOffset_Source
     {
-        public RegisterOffset Offset { get; set; }
-        public Push_RegisterOffset(RegisterOffset offset)
+        public RegisterOffset Source { get; set; }
+        public Push_RegisterOffset(RegisterOffset source)
         {
-            Offset = offset;
+            Source = source;
         }
 
         public override string Emit()
         {
-            return $"push {Offset}";
+            return $"push {Source}";
         }
 
         public override byte[] Assemble(Section section, uint absoluteInstructionPointer, Dictionary<string, Address> resolvedLabels)
         {
             byte opCode = 0xFF;
             // here esi is 110 opcode extension 6
-            return opCode.Encode(Offset.EncodeAsRM(X86Register.esi));
+            return opCode.Encode(Source.EncodeAsRM(X86Register.esi));
         }
 
-        public override uint GetSizeOnDisk() => 1 + (uint)Offset.EncodeAsRM(X86Register.esi).Length;
-        public override uint GetVirtualSize() => 1 + (uint)Offset.EncodeAsRM(X86Register.esi).Length;
+        public override uint GetSizeOnDisk() => 1 + (uint)Source.EncodeAsRM(X86Register.esi).Length;
+        public override uint GetVirtualSize() => 1 + (uint)Source.EncodeAsRM(X86Register.esi).Length;
     }
 
-    public class Push_SymbolOffset : X86Instruction
+    public class Push_SymbolOffset : X86Instruction, ISymbolOffset_Source
     {
-        public SymbolOffset Offset { get; set; }
-        public Push_SymbolOffset(SymbolOffset offset)
+        public SymbolOffset Source { get; set; }
+        public Push_SymbolOffset(SymbolOffset source)
         {
-            Offset = offset;
+            Source = source;
         }
 
         public override string Emit()
         {
-            return $"push {Offset}";
+            return $"push {Source}";
         }
 
         public override byte[] Assemble(Section section, uint absoluteInstructionPointer, Dictionary<string, Address> resolvedLabels)
         {
-            var address = GetAddressOrThrow(resolvedLabels, Offset.Symbol);
+            var address = GetAddressOrThrow(resolvedLabels, Source.Symbol);
             byte opCode = 0xFF;
             // here esi is 110 opcode extension 6
-            return opCode.Encode(Offset.EncodeAsRM(X86Register.esi, address));
+            return opCode.Encode(Source.EncodeAsRM(X86Register.esi, address));
+        }
+
+        public override void AddRelocationEntry(BaseRelocationBlock baseRelocationBlock, ushort currentVirtualOffsetFromSectionStart)
+        {
+            baseRelocationBlock.AddEntry(currentVirtualOffsetFromSectionStart + ((ushort)GetVirtualSize() - 4)); // symbol address is placed at last 4 bytes of instruction encoding
         }
 
         public override uint GetSizeOnDisk() => 6;

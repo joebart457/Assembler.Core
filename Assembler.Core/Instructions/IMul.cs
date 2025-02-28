@@ -1,12 +1,13 @@
 ﻿using Assembler.Core.Constants;
 using Assembler.Core.Extensions;
+using Assembler.Core.Interfaces;
 using Assembler.Core.Models;
 using Assembler.Core.PortableExecutable;
 using Assembler.Core.PortableExecutable.Models;
 
 namespace Assembler.Core.Instructions
 {
-    public class IMul_Register_Register : X86Instruction
+    public class IMul_Register_Register : X86Instruction, IRegister_Register
     {
         public X86Register Destination { get; set; }
         public X86Register Source { get; set; }
@@ -34,27 +35,27 @@ namespace Assembler.Core.Instructions
         public override uint GetSizeOnDisk() => 3;
     }
 
-    public class IMul_Register_Immediate : X86Instruction
+    public class IMul_Register_Immediate : X86Instruction, IRegister_Immediate
     {
         public X86Register Destination { get; set; }
-        public int Immediate { get; set; }
+        public int ImmediateValue { get; set; }
 
-        public IMul_Register_Immediate(X86Register destination, int immediate)
+        public IMul_Register_Immediate(X86Register destination, int immediateValue)
         {
             Destination = destination;
-            Immediate = immediate;
+            ImmediateValue = immediateValue;
         }
 
         public override string Emit()
         {
-            return $"imul {Destination}, {Immediate}";
+            return $"imul {Destination}, {ImmediateValue}";
         }
 
         public override byte[] Assemble(Section section, uint absoluteInstructionPointer, Dictionary<string, Address> resolvedLabels)
         {
             byte opCode = 0x69;
             var modRM = Mod.RegisterDirect.ApplyOperand1(Destination).ApplyOperand2(Destination);
-            return new List<byte>() { opCode, modRM }.Concat(Immediate.ToBytes()).ToArray();
+            return new List<byte>() { opCode, modRM }.Concat(ImmediateValue.ToBytes()).ToArray();
         }
 
         public override uint GetVirtualSize() => 6;

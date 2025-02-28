@@ -1,7 +1,6 @@
 ﻿using Assembler.Core.Constants;
 using Assembler.Core.Extensions;
 using Assembler.Core.PortableExecutable.Models;
-using Microsoft.Win32;
 
 namespace Assembler.Core.Models
 {
@@ -18,7 +17,7 @@ namespace Assembler.Core.Models
         public override string ToString()
         {
             var repr = Offset == 0 ? Symbol : $"{Symbol} {(Offset > 0 ? "+" : "-")} {Math.Abs(Offset)}";
-            return $"dword [{repr}]";
+            return $"[{repr}]";
         }
 
         public override bool Equals(object? obj)

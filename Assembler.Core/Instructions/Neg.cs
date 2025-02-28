@@ -1,24 +1,25 @@
 ﻿
 using Assembler.Core.Constants;
 using Assembler.Core.Extensions;
+using Assembler.Core.Interfaces;
 using Assembler.Core.Models;
 using Assembler.Core.PortableExecutable;
 using Assembler.Core.PortableExecutable.Models;
 
 namespace Assembler.Core.Instructions
 {
-    public class Neg_RegisterOffset : X86Instruction
+    public class Neg_RegisterOffset : X86Instruction, IRegisterOffset_Destination
     {
-        public RegisterOffset Operand { get; set; }
+        public RegisterOffset Destination { get; set; }
 
-        public Neg_RegisterOffset(RegisterOffset operand)
+        public Neg_RegisterOffset(RegisterOffset destination)
         {
-            Operand = operand;
+            Destination = destination;
         }
 
         public override string Emit()
         {
-            return $"neg {Operand}";
+            return $"neg {Destination}";
         }
 
         public override byte[] Assemble(Section section, uint absoluteInstructionPointer, Dictionary<string, Address> resolvedLabels)
@@ -26,32 +27,32 @@ namespace Assembler.Core.Instructions
             byte opCode = 0xF7;
             // Here ebx is 011 which is opcode extension 3
             
-            return opCode.Encode(Operand.EncodeAsRM(X86Register.ebx));
+            return opCode.Encode(Destination.EncodeAsRM(X86Register.ebx));
         }
 
-        public override uint GetVirtualSize() => 1 + (uint)Operand.EncodeAsRM(X86Register.ebx).Length;
-        public override uint GetSizeOnDisk() => 1 + (uint)Operand.EncodeAsRM(X86Register.ebx).Length;
+        public override uint GetVirtualSize() => 1 + (uint)Destination.EncodeAsRM(X86Register.ebx).Length;
+        public override uint GetSizeOnDisk() => 1 + (uint)Destination.EncodeAsRM(X86Register.ebx).Length;
     }
 
-    public class Neg_Register : X86Instruction
+    public class Neg_Register : X86Instruction, IRegister_Destination
     {
-        public X86Register Operand { get; set; }
+        public X86Register Destination { get; set; }
 
-        public Neg_Register(X86Register operand)
+        public Neg_Register(X86Register destination)
         {
-            Operand = operand;
+            Destination = destination;
         }
 
         public override string Emit()
         {
-            return $"neg {Operand}";
+            return $"neg {Destination}";
         }
 
         public override byte[] Assemble(Section section, uint absoluteInstructionPointer, Dictionary<string, Address> resolvedLabels)
         {
             byte opCode = 0xF7;
             // Here ebx is 011 which is opcode extension 3
-            var modRM = Mod.RegisterDirect.ApplyOperand1(X86Register.ebx).ApplyOperand2(Operand);
+            var modRM = Mod.RegisterDirect.ApplyOperand1(X86Register.ebx).ApplyOperand2(Destination);
             return [opCode, modRM];
         }
 

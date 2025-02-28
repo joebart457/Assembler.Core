@@ -1,12 +1,13 @@
 ﻿using Assembler.Core.Constants;
 using Assembler.Core.Extensions;
+using Assembler.Core.Interfaces;
 using Assembler.Core.Models;
 using Assembler.Core.PortableExecutable;
 using Assembler.Core.PortableExecutable.Models;
 
 namespace Assembler.Core.Instructions
 {
-    public class Shl_Register_Immediate : X86Instruction
+    public class Shl_Register_Immediate : X86Instruction, IRegister_ByteImmediate
     {
         public X86Register Destination { get; set; }
         public byte ImmediateValue { get; set; }
@@ -34,7 +35,7 @@ namespace Assembler.Core.Instructions
         public override uint GetVirtualSize() => 3;
     }
 
-    public class Shl_RegisterOffset_Immediate : X86Instruction
+    public class Shl_RegisterOffset_Immediate : X86Instruction, IRegisterOffset_ByteImmediate
     {
         public RegisterOffset Destination { get; set; }
         public byte ImmediateValue { get; set; }

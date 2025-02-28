@@ -1,12 +1,13 @@
 ﻿using Assembler.Core.Constants;
 using Assembler.Core.Extensions;
+using Assembler.Core.Interfaces;
 using Assembler.Core.Models;
 using Assembler.Core.PortableExecutable;
 using Assembler.Core.PortableExecutable.Models;
 
 namespace Assembler.Core.Instructions
 {
-    public class Test_Register_Register : X86Instruction
+    public class Test_Register_Register : X86Instruction, INonAltering_Register_Register
     {
         public X86Register Destination { get; set; }
         public X86Register Source { get; set; }
@@ -32,25 +33,25 @@ namespace Assembler.Core.Instructions
         public override uint GetVirtualSize() => 2;
     }
 
-    public class Test_Register_RegisterOffset : X86Instruction
+    public class Test_Register_RegisterOffset : X86Instruction, INonAltering_Register_RegisterOffset
     {
-        public X86Register Operand1 { get; set; }
-        public RegisterOffset Operand2 { get; set; }
+        public X86Register Destination { get; set; }
+        public RegisterOffset Source { get; set; }
         public Test_Register_RegisterOffset(X86Register operand1, RegisterOffset operand2)
         {
-            Operand1 = operand1;
-            Operand2 = operand2;
+            Destination = operand1;
+            Source = operand2;
         }
 
         public override string Emit()
         {
-            return $"test {Operand1}, {Operand2}";
+            return $"test {Destination}, {Source}";
         }
 
         public override byte[] Assemble(Section section, uint absoluteInstructionPointer, Dictionary<string, Address> resolvedLabels)
         {
             byte opCode = 0x85;
-            return opCode.Encode(Operand2.EncodeAsRM(Operand1));
+            return opCode.Encode(Source.EncodeAsRM(Destination));
         }
 
         public override uint GetSizeOnDisk() => 2;
