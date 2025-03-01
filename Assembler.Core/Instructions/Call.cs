@@ -65,7 +65,7 @@ namespace Assembler.Core.Instructions
         {
             byte opCode = 0xFF;
             // ECX is encoded as 0b00_010_000 which in this case is used not as a reg but as the instruction opcode extension
-            return opCode.Encode(Callee.EncodeAsRM(X86Register.ecx));
+            return opCode.Encode(Callee.EncodeAsRM(X86Register.edx));
         }
 
         public override uint GetSizeOnDisk() => 2;
