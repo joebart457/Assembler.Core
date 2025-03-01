@@ -89,7 +89,7 @@ namespace Assembler.Core.Instructions
         {
             byte opCode = 0xFF;
             // ECX is encoded as 0b00_010_000 which in this case is used not as a reg but as the instruction opcode extension
-            var modRM = Mod.RegisterDirect.ApplyOperand1(X86Register.ecx).ApplyOperand2(Callee);
+            var modRM = Mod.RegisterDirect.ApplyOperand1(X86Register.edx).ApplyOperand2(Callee);
             return [opCode, modRM];
         }
 

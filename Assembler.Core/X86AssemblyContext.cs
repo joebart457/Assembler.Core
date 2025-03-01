@@ -233,7 +233,11 @@ public class X86AssemblyContext
     public void Return()
     {
         if (CurrentFunction.CallingConvention == CallingConvention.StdCall)
-            Ret((ushort)CurrentFunction.Parameters.Sum(x => x.StackSize));
+        {
+            var bytesToPop = (ushort)CurrentFunction.Parameters.Sum(x => x.StackSize);
+            if (bytesToPop == 0) Ret();
+            else Ret(bytesToPop);
+        }
         else if (CurrentFunction.CallingConvention == CallingConvention.Cdecl)
             Ret();
         else throw new NotImplementedException($"calling convention {CurrentFunction.CallingConvention} has not been implemented");
