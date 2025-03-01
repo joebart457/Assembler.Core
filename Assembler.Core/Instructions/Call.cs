@@ -68,8 +68,8 @@ namespace Assembler.Core.Instructions
             return opCode.Encode(Callee.EncodeAsRM(X86Register.edx));
         }
 
-        public override uint GetSizeOnDisk() => 2;
-        public override uint GetVirtualSize() => 2;
+        public override uint GetSizeOnDisk() => 1 + (uint)Callee.EncodeAsRM(X86Register.edx).Length;
+        public override uint GetVirtualSize() => 1 + (uint)Callee.EncodeAsRM(X86Register.edx).Length;
     }
 
     public class Call_Register : X86Instruction

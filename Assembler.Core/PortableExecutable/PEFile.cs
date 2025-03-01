@@ -52,6 +52,15 @@ public class PEFile {
         return size;
     }
 
+    public ushort GetNumberOfSections()
+    {
+        ushort result = 3;
+        if (ExportsSection != null) result++;
+        if (BssSection != null) result++;
+        if (RelocationsSection != null) result++;
+        return result;
+    }
+
     private byte[] AssembleHeaders()
     {
         var assembledBytes = new List<byte>();
@@ -130,7 +139,10 @@ public class PEFile {
 
         OptionalHeader32.AddressOfEntryPoint = addressOfEntryPoint.RelativeVirtualAddress;
         OptionalHeader32.SizeOfCode = CodeSection.SizeOfRawData;
-        OptionalHeader32.SizeOfInitializedData = DataSection.SizeOfRawData + ImportsSection.SizeOfRawData + (RelocationsSection?.SizeOfRawData ?? 0);
+        OptionalHeader32.SizeOfInitializedData = DataSection.SizeOfRawData 
+            + ImportsSection.SizeOfRawData 
+            + (ExportsSection?.SizeOfRawData ?? 0) 
+            + (RelocationsSection?.SizeOfRawData ?? 0);
         OptionalHeader32.BaseOfData = DataSection.RelativeVirtualAddress;
         OptionalHeader32.BaseOfCode = CodeSection.RelativeVirtualAddress;
         OptionalHeader32.SizeOfImage = GetImageSize();
@@ -140,7 +152,7 @@ public class PEFile {
         OptionalHeader32.BaseRelocationTable = RelocationsSection == null? ImageDataDirectory.Zero : RelocationsSection.ToDataDirectory();
         OptionalHeader32.ExportTable = ExportsSection == null? ImageDataDirectory.Zero : ExportsSection.ToDataDirectory();
         OptionalHeader32.SizeOfUninitializedData = BssSection?.VirtualSize ?? 0;
-
+        FileHeader.NumberOfSections = GetNumberOfSections();
         var assembledBytes = AssembleHeaders().ToList();
         var checksumOffset = 0xD8;
 
@@ -315,7 +327,7 @@ public class PEFile {
     private void CreateNTHeader()
     {
         FileHeader.Signature = Defaults.PEMagic;
-        FileHeader.NumberOfSections = 3;
+        FileHeader.NumberOfSections = 0x0000; // Must be set at assemble time
         FileHeader.Machine = Defaults.Machine;
         FileHeader.TimeDateStamp = (uint)DateTime.Now.Ticks;
         FileHeader.PointerToSymbolTable = 0;

@@ -180,7 +180,7 @@ public static class X86AssemblyGenerator
             int exportedNamesCounter = 0;
             foreach (var exportedFunction in assemblyContext.ExportedFunctions)
             {
-                peFile.ExportsSection!.AddInstruction(new Label($"%exported_{exportedNamesCounter}"));
+                peFile.ExportsSection!.AddInstruction(new DefineDoubleWord_Rva(Rva.Create($"%exported_{exportedNamesCounter}")));
                 exportedNamesCounter++;
             }
             exportedNamesCounter = 0;
