@@ -27,10 +27,6 @@ namespace Assembler.Core.Instructions
             return opCode.Encode(offset.ToBytes());
         }
 
-        public override void AddRelocationEntry(BaseRelocationBlock baseRelocationBlock, ushort currentVirtualOffsetFromSectionStart)
-        {
-            baseRelocationBlock.AddEntry(currentVirtualOffsetFromSectionStart + 1); // currentVirtualOffset + 1 (size of opcodes)
-        }
         public override uint GetSizeOnDisk() => 5;
         public override uint GetVirtualSize() => 5;
     }
@@ -55,10 +51,6 @@ namespace Assembler.Core.Instructions
             return opCodes.Concat(offset.ToBytes()).ToArray();
         }
 
-        public override void AddRelocationEntry(BaseRelocationBlock baseRelocationBlock, ushort currentVirtualOffsetFromSectionStart)
-        {
-            baseRelocationBlock.AddEntry(currentVirtualOffsetFromSectionStart + 2); // currentVirtualOffset + 2 (size of opcodes)
-        }
         public override uint GetSizeOnDisk() => 6;
         public override uint GetVirtualSize() => 6;
     }
@@ -82,10 +74,7 @@ namespace Assembler.Core.Instructions
             var offset = address.VirtualAddress - (absoluteInstructionPointer + GetVirtualSize());
             return opCodes.Concat(offset.ToBytes()).ToArray();
         }
-        public override void AddRelocationEntry(BaseRelocationBlock baseRelocationBlock, ushort currentVirtualOffsetFromSectionStart)
-        {
-            baseRelocationBlock.AddEntry(currentVirtualOffsetFromSectionStart + 2); // currentVirtualOffset + 2 (size of opcodes)
-        }
+
         public override uint GetSizeOnDisk() => 6;
         public override uint GetVirtualSize() => 6;
     }
@@ -110,10 +99,7 @@ namespace Assembler.Core.Instructions
             var offset = address.VirtualAddress - (absoluteInstructionPointer + GetVirtualSize());
             return opCodes.Concat(offset.ToBytes()).ToArray();
         }
-        public override void AddRelocationEntry(BaseRelocationBlock baseRelocationBlock, ushort currentVirtualOffsetFromSectionStart)
-        {
-            baseRelocationBlock.AddEntry(currentVirtualOffsetFromSectionStart + 2); // currentVirtualOffset + 2 (size of opcodes)
-        }
+
         public override uint GetSizeOnDisk() => 6;
         public override uint GetVirtualSize() => 6;
 
@@ -138,10 +124,7 @@ namespace Assembler.Core.Instructions
             var offset = address.VirtualAddress - (absoluteInstructionPointer + GetVirtualSize());
             return opCodes.Concat(offset.ToBytes()).ToArray();
         }
-        public override void AddRelocationEntry(BaseRelocationBlock baseRelocationBlock, ushort currentVirtualOffsetFromSectionStart)
-        {
-            baseRelocationBlock.AddEntry(currentVirtualOffsetFromSectionStart + 2); // currentVirtualOffset + 2 (size of opcodes)
-        }
+
         public override uint GetSizeOnDisk() => 6;
         public override uint GetVirtualSize() => 6;
     }
@@ -165,10 +148,7 @@ namespace Assembler.Core.Instructions
             var offset = address.VirtualAddress - (absoluteInstructionPointer + GetVirtualSize());
             return opCodes.Concat(offset.ToBytes()).ToArray();
         }
-        public override void AddRelocationEntry(BaseRelocationBlock baseRelocationBlock, ushort currentVirtualOffsetFromSectionStart)
-        {
-            baseRelocationBlock.AddEntry(currentVirtualOffsetFromSectionStart + 2); // currentVirtualOffset + 2 (size of opcodes)
-        }
+
         public override uint GetSizeOnDisk() => 6;
         public override uint GetVirtualSize() => 6;
     }
@@ -192,10 +172,7 @@ namespace Assembler.Core.Instructions
             var offset = address.VirtualAddress - (absoluteInstructionPointer + GetVirtualSize());
             return opCodes.Concat(offset.ToBytes()).ToArray();
         }
-        public override void AddRelocationEntry(BaseRelocationBlock baseRelocationBlock, ushort currentVirtualOffsetFromSectionStart)
-        {
-            baseRelocationBlock.AddEntry(currentVirtualOffsetFromSectionStart + 2); // currentVirtualOffset + 2 (size of opcodes)
-        }
+
         public override uint GetSizeOnDisk() => 6;
         public override uint GetVirtualSize() => 6;
     }
@@ -219,10 +196,7 @@ namespace Assembler.Core.Instructions
             var offset = address.VirtualAddress - (absoluteInstructionPointer + GetVirtualSize());
             return opCodes.Concat(offset.ToBytes()).ToArray();
         }
-        public override void AddRelocationEntry(BaseRelocationBlock baseRelocationBlock, ushort currentVirtualOffsetFromSectionStart)
-        {
-            baseRelocationBlock.AddEntry(currentVirtualOffsetFromSectionStart + 2); // currentVirtualOffset + 2 (size of opcodes)
-        }
+
         public override uint GetSizeOnDisk() => 6;
         public override uint GetVirtualSize() => 6;
     }
@@ -246,10 +220,7 @@ namespace Assembler.Core.Instructions
             var offset = address.VirtualAddress - (absoluteInstructionPointer + GetVirtualSize());
             return opCodes.Concat(offset.ToBytes()).ToArray();
         }
-        public override void AddRelocationEntry(BaseRelocationBlock baseRelocationBlock, ushort currentVirtualOffsetFromSectionStart)
-        {
-            baseRelocationBlock.AddEntry(currentVirtualOffsetFromSectionStart + 2); // currentVirtualOffset + 2 (size of opcodes)
-        }
+
         public override uint GetSizeOnDisk() => 6;
         public override uint GetVirtualSize() => 6;
     }
@@ -273,10 +244,7 @@ namespace Assembler.Core.Instructions
             var offset = address.VirtualAddress - (absoluteInstructionPointer + GetVirtualSize());
             return opCodes.Concat(offset.ToBytes()).ToArray();
         }
-        public override void AddRelocationEntry(BaseRelocationBlock baseRelocationBlock, ushort currentVirtualOffsetFromSectionStart)
-        {
-            baseRelocationBlock.AddEntry(currentVirtualOffsetFromSectionStart + 2); // currentVirtualOffset + 2 (size of opcodes)
-        }
+
         public override uint GetSizeOnDisk() => 6;
         public override uint GetVirtualSize() => 6;
     }
@@ -300,10 +268,7 @@ namespace Assembler.Core.Instructions
             var offset = address.VirtualAddress - (absoluteInstructionPointer + GetVirtualSize());
             return opCodes.Concat(offset.ToBytes()).ToArray();
         }
-        public override void AddRelocationEntry(BaseRelocationBlock baseRelocationBlock, ushort currentVirtualOffsetFromSectionStart)
-        {
-            baseRelocationBlock.AddEntry(currentVirtualOffsetFromSectionStart + 2); // currentVirtualOffset + 2 (size of opcodes)
-        }
+
         public override uint GetSizeOnDisk() => 6;
         public override uint GetVirtualSize() => 6;
     }
@@ -327,10 +292,7 @@ namespace Assembler.Core.Instructions
             var offset = address.VirtualAddress - (absoluteInstructionPointer + GetVirtualSize());
             return opCodes.Concat(offset.ToBytes()).ToArray();
         }
-        public override void AddRelocationEntry(BaseRelocationBlock baseRelocationBlock, ushort currentVirtualOffsetFromSectionStart)
-        {
-            baseRelocationBlock.AddEntry(currentVirtualOffsetFromSectionStart + 2); // currentVirtualOffset + 2 (size of opcodes)
-        }
+
         public override uint GetSizeOnDisk() => 6;
         public override uint GetVirtualSize() => 6;
     }
@@ -354,10 +316,7 @@ namespace Assembler.Core.Instructions
             var offset = address.VirtualAddress - (absoluteInstructionPointer + GetVirtualSize());
             return opCodes.Concat(offset.ToBytes()).ToArray();
         }
-        public override void AddRelocationEntry(BaseRelocationBlock baseRelocationBlock, ushort currentVirtualOffsetFromSectionStart)
-        {
-            baseRelocationBlock.AddEntry(currentVirtualOffsetFromSectionStart + 2); // currentVirtualOffset + 2 (size of opcodes)
-        }
+
         public override uint GetSizeOnDisk() => 6;
         public override uint GetVirtualSize() => 6;
     }
@@ -381,10 +340,7 @@ namespace Assembler.Core.Instructions
             var offset = address.VirtualAddress - (absoluteInstructionPointer + GetVirtualSize());
             return opCodes.Concat(offset.ToBytes()).ToArray();
         }
-        public override void AddRelocationEntry(BaseRelocationBlock baseRelocationBlock, ushort currentVirtualOffsetFromSectionStart)
-        {
-            baseRelocationBlock.AddEntry(currentVirtualOffsetFromSectionStart + 2); // currentVirtualOffset + 2 (size of opcodes)
-        }
+
         public override uint GetSizeOnDisk() => 6;
         public override uint GetVirtualSize() => 6;
     }
@@ -408,10 +364,6 @@ namespace Assembler.Core.Instructions
             List<byte> opCodes = [0x0F, 0x86];
             var offset = address.VirtualAddress - (absoluteInstructionPointer + GetVirtualSize());
             return opCodes.Concat(offset.ToBytes()).ToArray();
-        }
-        public override void AddRelocationEntry(BaseRelocationBlock baseRelocationBlock, ushort currentVirtualOffsetFromSectionStart)
-        {
-            baseRelocationBlock.AddEntry(currentVirtualOffsetFromSectionStart + 2); // currentVirtualOffset + 2 (size of opcodes)
         }
         public override uint GetSizeOnDisk() => 6;
         public override uint GetVirtualSize() => 6;

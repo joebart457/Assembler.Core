@@ -253,11 +253,9 @@ public class X86AssemblyContext
     public void CallImportedFunction(ImportedFunction importedFunction)
     {
         Call(importedFunction.FunctionIdentifier, true);
-        if (importedFunction.CallingConvention == CallingConvention.StdCall)
-            Ret((ushort)importedFunction.Parameters.Sum(x => x.StackSize));
-        else if (importedFunction.CallingConvention == CallingConvention.Cdecl)
-            Ret();
-        else throw new NotImplementedException($"calling convention {importedFunction.CallingConvention} has not been implemented");
+        if (importedFunction.CallingConvention == CallingConvention.Cdecl)
+            Add(X86Register.esp, CurrentFunction.Parameters.Sum(x => x.StackSize));
+        
     }
     public Cdq Cdq() => CurrentFunction.AddInstruction(new Cdq());
     public Push_Register Push(X86Register register) => CurrentFunction.AddInstruction(new Push_Register(register));

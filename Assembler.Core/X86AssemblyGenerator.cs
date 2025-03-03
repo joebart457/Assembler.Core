@@ -120,7 +120,12 @@ public static class X86AssemblyGenerator
             libCounter = 0;
             foreach (var importLibrary in assemblyContext.ImportLibraries)
             {
-
+                var alignmentOffFour = peFile.ImportsSection.VirtualSize % 4;
+                for (int i = 0; i < alignmentOffFour; i++)
+                {
+                    peFile.ImportsSection.AddInstruction(new DefineByte(0));
+                }
+                
                 peFile.ImportsSection.AddInstruction(new Label($"%ilt_{libCounter}"));
 
                 foreach (var importedFunction in importLibrary.ImportedFunctions)

@@ -80,6 +80,11 @@ public class DefineDoubleWord_Address : X86Instruction
         return $"dd {Symbol}";
     }
 
+    public override void AddRelocationEntry(BaseRelocationBlock baseRelocationBlock, ushort currentVirtualOffsetFromSectionStart)
+    {
+        baseRelocationBlock.AddEntry(currentVirtualOffsetFromSectionStart);
+    }
+
     public override byte[] Assemble(Section section, uint absoluteInstructionPointer, Dictionary<string, Address> resolvedLabels)
     {
         var address = GetAddressOrThrow(resolvedLabels, Symbol);

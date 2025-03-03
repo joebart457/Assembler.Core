@@ -98,14 +98,14 @@ namespace Assembler.Core.PortableExecutable
                 if (currentVirtualOffsetFromSectionStart > peFile.OptionalHeader32.SectionAlignment)
                 {
                     currentVirtualOffsetFromSectionStart -= peFile.OptionalHeader32.SectionAlignment; // I am still unsure if instructions can cross page boundaries or not. This may need to be reworked if not
-                    relocationBlocks.Add(currentBlock);
+                    if (currentBlock.Entries.Count != 0) relocationBlocks.Add(currentBlock);
                     currentBlock = new BaseRelocationBlock()
                     {
                         PageRVA = currentBlock.PageRVA + pageSize,
                     };
                 }
             }
-            if (relocationBlocks.LastOrDefault() != currentBlock) relocationBlocks.Add(currentBlock);
+            if (relocationBlocks.LastOrDefault() != currentBlock && currentBlock.Entries.Count != 0) relocationBlocks.Add(currentBlock);
             return relocationBlocks;
         }
 

@@ -6,7 +6,7 @@ public class ImageSectionHeader
     public static uint Size => 40;
 
     [MarshalAs(UnmanagedType.ByValArray, SizeConst = 8)]
-    public byte[] Name;
+    public byte[] Name = new byte[8];
     public UInt32 VirtualSize;
     public UInt32 VirtualAddress;
     public UInt32 SizeOfRawData;

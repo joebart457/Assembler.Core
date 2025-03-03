@@ -26,6 +26,12 @@ namespace Assembler.Core.Instructions
 
         public override uint GetVirtualSize() => IsIndirect ? (uint)6 : (uint)5;
 
+        public override void AddRelocationEntry(BaseRelocationBlock baseRelocationBlock, ushort currentVirtualOffsetFromSectionStart)
+        {
+            if (!IsIndirect) return;
+            baseRelocationBlock.AddEntry(currentVirtualOffsetFromSectionStart + 2); // since indirect far calls absolute address
+        }
+
         public override byte[] Assemble(Section section, uint absoluteInstructionPointer, Dictionary<string, Address> resolvedLabels)
         {
             var address = GetAddressOrThrow(resolvedLabels, Callee);

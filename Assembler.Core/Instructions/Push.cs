@@ -100,9 +100,9 @@ namespace Assembler.Core.Instructions
         public override uint GetVirtualSize() => 5;
         public override uint GetSizeOnDisk() => 5;
 
-        public override void AddRelocationEntry(BaseRelocationBlock baseRelocationBlock, ushort currentRVA)
+        public override void AddRelocationEntry(BaseRelocationBlock baseRelocationBlock, ushort currentVirtualOffsetFromSectionStart)
         {
-            baseRelocationBlock.AddEntry(currentRVA + 1);
+            baseRelocationBlock.AddEntry(currentVirtualOffsetFromSectionStart + 1);
         }
 
         public override byte[] Assemble(Section section, uint absoluteInstructionPointer, Dictionary<string, Address> resolvedLabels)

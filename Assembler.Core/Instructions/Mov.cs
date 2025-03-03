@@ -48,7 +48,7 @@ namespace Assembler.Core.Instructions
 
         public override byte[] Assemble(Section section, uint absoluteInstructionPointer, Dictionary<string, Address> resolvedLabels)
         {
-            byte opCode = 89;
+            byte opCode = 0x89;
             return opCode.Encode(Destination.EncodeAsRM(Source));
         }
 

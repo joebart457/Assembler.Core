@@ -81,7 +81,7 @@ public class PEFile {
     public void MarkAsDLL()
     {
         OptionalHeader32.DllCharacteristics = DllCharacteristics.DynamicBase;
-        FileHeader.Characteristics = PE32Characteristics.ExecutableImage | PE32Characteristics.LineNumsStripped | PE32Characteristics.LocalSymsStripped | PE32Characteristics.Bit32Machine;
+        FileHeader.Characteristics = PE32Characteristics.ExecutableImage | PE32Characteristics.LineNumsStripped | PE32Characteristics.LocalSymsStripped | PE32Characteristics.Bit32Machine |PE32Characteristics.Dll;
 
         if (RelocationsSection == null) RelocationsSection = new();
     }
