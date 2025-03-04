@@ -7,7 +7,7 @@ using Assembler.Core.PortableExecutable.Models;
 
 namespace Assembler.Core.Instructions
 {
-    public class Pop_Register : X86Instruction, IRegister_Destination
+    public class Pop_Register : X86Instruction, IRegister_Destination, IPop
     {
         public X86Register Destination { get; set; }
 

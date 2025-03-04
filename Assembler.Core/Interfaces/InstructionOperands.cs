@@ -31,12 +31,12 @@ public interface IXmmRegister_RegisterOffset : IXmmRegister_Destination, IRegist
 public interface IXmmRegister_XmmRegister : IXmmRegister_Destination, IXmmRegister_Source;
 
 
-public interface INonAltering_XmmRegister_XmmRegister : IXmmRegister_XmmRegister;
-public interface INonAltering_XmmRegister_RegisterOffset : IXmmRegister_RegisterOffset;
-public interface INonAltering_ByteRegister_ByteRegister : IByteRegister_ByteRegister;
-public interface INonAltering_Register_Register : IRegister_Register;
-public interface INonAltering_Register_RegisterOffset : IRegister_RegisterOffset;
-public interface INonAltering_Register_Immediate : IRegister_Immediate;
+public interface INonAltering_XmmRegister_XmmRegister : IXmmRegister_XmmRegister, INonAltering_XmmRegister_Destination;
+public interface INonAltering_XmmRegister_RegisterOffset : IXmmRegister_RegisterOffset, INonAltering_XmmRegister_Destination;
+public interface INonAltering_ByteRegister_ByteRegister : IByteRegister_ByteRegister, INonAltering_ByteRegister_Destination;
+public interface INonAltering_Register_Register : IRegister_Register, INonAltering_Register_Destination;
+public interface INonAltering_Register_RegisterOffset : IRegister_RegisterOffset, INonAltering_Register_Destination;
+public interface INonAltering_Register_Immediate : IRegister_Immediate, INonAltering_Register_Destination;
 
 
 public interface IRegister_Destination
@@ -91,3 +91,14 @@ public interface IByteImmediate_Source
     public byte ImmediateValue { get; set; }
 }
 
+
+public interface INonAltering_Register_Destination: IRegister_Destination;
+public interface INonAltering_ByteRegister_Destination: IByteRegister_Destination;
+public interface INonAltering_XmmRegister_Destination: IXmmRegister_Destination;
+public interface INonAltering_RegisterOffset_Destination: IRegisterOffset_Destination;
+public interface INonAltering_SymbolOffset_Destination: ISymbolOffset_Destination;
+
+public interface IPush;
+public interface IPop;
+public interface ICall;
+public interface IJmp;

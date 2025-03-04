@@ -12,6 +12,4 @@ public class CodeSection: Section
     public override UInt16 NumberOfRelocations => 0;
     public override UInt16 NumberOfLineNumbers => 0;
     public override UInt32 Characteristics => SectionCharacteristics.ContainsCode | SectionCharacteristics.MemExecute | SectionCharacteristics.MemRead;
-
-
 }

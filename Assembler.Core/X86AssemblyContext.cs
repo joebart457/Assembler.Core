@@ -34,8 +34,10 @@ public class X86AssemblyContext
     public X86Function? EntryPoint { get; set; }
     public X86Function GetEntryPoint() => EntryPoint ?? throw new InvalidOperationException("entry point has not been defined");
     public string GetExportFileName() => _exportFileName ?? throw new InvalidOperationException("export filepath was not defined");
+    public string? OutputToPeFile(out PEFile peFile) => X86AssemblyGenerator.OutputToPeFile(this, out peFile);
     public string? OutputToFile(string outputFilePath) => X86AssemblyGenerator.OutputToFile(this, outputFilePath);
     public string? OutputToMemory(out byte[] generatedX86Code) => X86AssemblyGenerator.OutputToMemory(this, out generatedX86Code);
+    public string? OutputAsText(out string? generatedX86AssemblyCode) => X86AssemblyGenerator.OutputAsText(this, out generatedX86AssemblyCode);
     public void SetOutputTarget(OutputTarget target)
     {
         OutputTarget = target;

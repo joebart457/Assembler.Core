@@ -8,21 +8,38 @@ namespace Assembler.Core;
 
 public static class X86AssemblyGenerator
 {
+    public static string? OutputToPeFile(X86AssemblyContext assemblyContext, out PEFile peFile)
+    {
+        var errorMessage = OutputX86Assembly(assemblyContext, out peFile);
+        return errorMessage;
+    }
+
     public static string? OutputToFile(X86AssemblyContext assemblyContext, string pathToFinalBinary)
     {
-        var errorMessage = OutputX86Assembly(assemblyContext, out var generatedCode);
+        var errorMessage = OutputX86Assembly(assemblyContext, out var peFile);
         if (errorMessage != null) return errorMessage;
-        File.WriteAllBytes(pathToFinalBinary, generatedCode);
+        var bytes = peFile.AssembleProgram();
+        File.WriteAllBytes(pathToFinalBinary, bytes);
         return null;
     }
 
     public static string? OutputToMemory(X86AssemblyContext assemblyContext, out byte[] generatedPEFileBytes)
     {
-        var errorMessage = OutputX86Assembly(assemblyContext, out generatedPEFileBytes);
+        var errorMessage = OutputX86Assembly(assemblyContext, out var peFile);
+        generatedPEFileBytes = peFile.AssembleProgram();
         return errorMessage;
     }
 
-    private static string? OutputX86Assembly(X86AssemblyContext assemblyContext, out byte[] generatedPEFileBytes)
+    public static string? OutputAsText(X86AssemblyContext assemblyContext, out string? text)
+    {
+        text = null;
+        var errorMessage = OutputX86Assembly(assemblyContext, out var peFile);
+        if (errorMessage != null) return errorMessage;
+        text = peFile.OutputAsText();
+        return null;
+    }
+
+    private static string? OutputX86Assembly(X86AssemblyContext assemblyContext, out PEFile generatedPEFile)
     {
         var peFile = new PEFile();
 
@@ -208,8 +225,10 @@ public static class X86AssemblyGenerator
                 exportedNamesCounter++;
             }
         }
-
-        generatedPEFileBytes = peFile.AssembleProgram(assemblyContext.GetEntryPoint().GetDecoratedFunctionLabel());
+        peFile.SetEntryPoint(assemblyContext.GetEntryPoint().GetDecoratedFunctionLabel());
+        generatedPEFile = peFile;
         return null; // return null since there are no errors
     }
+
+
 }

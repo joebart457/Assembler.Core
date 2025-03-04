@@ -2,6 +2,7 @@
 using Assembler.Core.PortableExecutable;
 using Assembler.Core.PortableExecutable.Constants;
 using Assembler.Core.PortableExecutable.Models;
+using System.Text;
 
 
 public class PEFile {
@@ -93,9 +94,17 @@ public class PEFile {
     }
 
     public bool IsMarkedAsDLL => (OptionalHeader32.DllCharacteristics & DllCharacteristics.DynamicBase) == DllCharacteristics.DynamicBase;
+    private string? _entryPoint;
+    public void SetEntryPoint(string? entryPoint) => _entryPoint = entryPoint;
 
-    public byte[] AssembleProgram(string entryPoint)
+    public byte[] AssembleProgram(string? entryPoint = null)
     {
+        if (entryPoint == null)
+        {
+            if (_entryPoint == null) throw new InvalidOperationException($"entry point not specified");
+            entryPoint = _entryPoint;
+        }
+        
         if (!IsMarkedAsDLL) MarkAsExe();
         var headerBytes = AssembleHeaders();
 
@@ -171,6 +180,46 @@ public class PEFile {
         }
 
         return assembledBytes.ToArray();
+    }
+    public string OutputAsText(string? entryPoint = null)
+    {
+        if (entryPoint == null)
+        {
+            if (_entryPoint == null) throw new InvalidOperationException($"entry point not specified");
+            entryPoint = _entryPoint;
+        }
+
+        var sb = new StringBuilder();
+        sb.AppendLine($"entry {entryPoint}");
+        sb.AppendLine($"target {(IsMarkedAsDLL ? "DLL" : "EXE")}");
+        sb.AppendLine();
+        sb.AppendLine();
+        sb.Append(DataSection.Emit());
+        sb.AppendLine();
+        sb.AppendLine();
+        sb.Append(CodeSection.Emit());
+        sb.AppendLine();
+        sb.AppendLine();
+        sb.Append(ImportsSection.Emit());
+        if (ExportsSection != null)
+        {
+            sb.AppendLine();
+            sb.AppendLine();
+            sb.Append(ExportsSection.Emit());
+        }
+        if (BssSection != null)
+        {
+            sb.AppendLine();
+            sb.AppendLine();
+            sb.Append(BssSection.Emit());
+        }
+        if (RelocationsSection != null)
+        {
+            sb.AppendLine();
+            sb.AppendLine();
+            sb.Append(RelocationsSection.Emit());
+        }
+        return sb.ToString();   
     }
 
     private void AssembleSection(Section? section, List<byte> assembledBytes, Dictionary<string, Address> labelAddresses)

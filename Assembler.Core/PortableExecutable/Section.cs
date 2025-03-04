@@ -3,6 +3,7 @@ using Assembler.Core.Instructions;
 using Assembler.Core.Models;
 using Assembler.Core.PortableExecutable.Constants;
 using Assembler.Core.PortableExecutable.Models;
+using System.Text;
 
 namespace Assembler.Core.PortableExecutable
 {
@@ -124,6 +125,24 @@ namespace Assembler.Core.PortableExecutable
             }
         }
 
+        public virtual string Emit()
+        {
+            var sb = new StringBuilder();
+            sb.AppendLine($"section {Encoding.UTF8.GetString(Name)}");
+            bool encounteredLabel = false;
+            foreach (var instruction in DataInstructions)
+            {
+
+                if (instruction is Label label)
+                {
+                    encounteredLabel = true;
+                    sb.AppendLine(instruction.Emit().Indent(1));
+                }
+                else if (encounteredLabel) sb.AppendLine(instruction.Emit().Indent(2));
+                else sb.AppendLine(instruction.Emit().Indent(1));
+            }
+            return sb.ToString();
+        }
         
     }
 }

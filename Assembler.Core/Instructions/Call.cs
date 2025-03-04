@@ -1,12 +1,13 @@
 ﻿using Assembler.Core.Constants;
 using Assembler.Core.Extensions;
+using Assembler.Core.Interfaces;
 using Assembler.Core.Models;
 using Assembler.Core.PortableExecutable;
 using Assembler.Core.PortableExecutable.Models;
 
 namespace Assembler.Core.Instructions
 {
-    public class Call : X86Instruction
+    public class Call : X86Instruction, ICall
     {
         public string Callee { get; set; }
         public bool IsIndirect { get; set; }
@@ -54,48 +55,48 @@ namespace Assembler.Core.Instructions
 
     }
 
-    public class Call_RegisterOffset : X86Instruction
+    public class Call_RegisterOffset : X86Instruction, IRegisterOffset_Source, ICall
     {
-        public RegisterOffset Callee { get; set; }
+        public RegisterOffset Source { get; set; }
         public Call_RegisterOffset(RegisterOffset callee)
         {
-            Callee = callee;
+            Source = callee;
         }
 
         public override string Emit()
         {
-            return $"call {Callee}";
+            return $"call {Source}";
         }
 
         public override byte[] Assemble(Section section, uint absoluteInstructionPointer, Dictionary<string, Address> resolvedLabels)
         {
             byte opCode = 0xFF;
             // ECX is encoded as 0b00_010_000 which in this case is used not as a reg but as the instruction opcode extension
-            return opCode.Encode(Callee.EncodeAsRM(X86Register.edx));
+            return opCode.Encode(Source.EncodeAsRM(X86Register.edx));
         }
 
-        public override uint GetSizeOnDisk() => 1 + (uint)Callee.EncodeAsRM(X86Register.edx).Length;
-        public override uint GetVirtualSize() => 1 + (uint)Callee.EncodeAsRM(X86Register.edx).Length;
+        public override uint GetSizeOnDisk() => 1 + (uint)Source.EncodeAsRM(X86Register.edx).Length;
+        public override uint GetVirtualSize() => 1 + (uint)Source.EncodeAsRM(X86Register.edx).Length;
     }
 
-    public class Call_Register : X86Instruction
+    public class Call_Register : X86Instruction, IRegister_Source, ICall
     {
-        public X86Register Callee { get; set; }
+        public X86Register Source { get; set; }
         public Call_Register(X86Register callee)
         {
-            Callee = callee;
+            Source = callee;
         }
 
         public override string Emit()
         {
-            return $"call {Callee}";
+            return $"call {Source}";
         }
 
         public override byte[] Assemble(Section section, uint absoluteInstructionPointer, Dictionary<string, Address> resolvedLabels)
         {
             byte opCode = 0xFF;
             // ECX is encoded as 0b00_010_000 which in this case is used not as a reg but as the instruction opcode extension
-            var modRM = Mod.RegisterDirect.ApplyOperand1(X86Register.edx).ApplyOperand2(Callee);
+            var modRM = Mod.RegisterDirect.ApplyOperand1(X86Register.edx).ApplyOperand2(Source);
             return [opCode, modRM];
         }
 

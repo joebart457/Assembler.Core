@@ -7,7 +7,7 @@ using Assembler.Core.PortableExecutable.Models;
 
 namespace Assembler.Core.Instructions
 {
-    public class Push_Register : X86Instruction, IRegister_Source
+    public class Push_Register : X86Instruction, IRegister_Source, IPush
     {
         public X86Register Source { get; set; }
         public Push_Register(X86Register source)
@@ -30,7 +30,7 @@ namespace Assembler.Core.Instructions
         public override uint GetVirtualSize() => 1;
     }
 
-    public class Push_RegisterOffset : X86Instruction, IRegisterOffset_Source
+    public class Push_RegisterOffset : X86Instruction, IRegisterOffset_Source, IPush
     {
         public RegisterOffset Source { get; set; }
         public Push_RegisterOffset(RegisterOffset source)
@@ -54,7 +54,7 @@ namespace Assembler.Core.Instructions
         public override uint GetVirtualSize() => 1 + (uint)Source.EncodeAsRM(X86Register.esi).Length;
     }
 
-    public class Push_SymbolOffset : X86Instruction, ISymbolOffset_Source
+    public class Push_SymbolOffset : X86Instruction, ISymbolOffset_Source, IPush
     {
         public SymbolOffset Source { get; set; }
         public Push_SymbolOffset(SymbolOffset source)
@@ -84,7 +84,7 @@ namespace Assembler.Core.Instructions
         public override uint GetVirtualSize() => 6;
     }
 
-    public class Push_Address : X86Instruction
+    public class Push_Address : X86Instruction, IPush
     {
         public string Address { get; set; }
         public Push_Address(string address)
@@ -114,7 +114,7 @@ namespace Assembler.Core.Instructions
         }
     }
 
-    public class Push_Immediate : X86Instruction
+    public class Push_Immediate : X86Instruction, IPush
     {
         public int Immediate { get; set; }
 
