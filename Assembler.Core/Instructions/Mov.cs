@@ -31,6 +31,37 @@ namespace Assembler.Core.Instructions
         public override uint GetVirtualSize() => 1 + (uint)Source.EncodeAsRM(Destination).Length;
     }
 
+    public class Mov_Register_SymbolOffset : X86Instruction, IRegister_SymbolOffset
+    {
+        public X86Register Destination { get; set; }
+        public SymbolOffset Source { get; set; }
+        public Mov_Register_SymbolOffset(X86Register destination, SymbolOffset source)
+        {
+            Destination = destination;
+            Source = source;
+        }
+
+        public override string Emit()
+        {
+            return $"mov {Destination}, {Source}";
+        }
+
+        public override void AddRelocationEntry(BaseRelocationBlock baseRelocationBlock, ushort currentVirtualOffsetFromSectionStart)
+        {
+            baseRelocationBlock.AddEntry(currentVirtualOffsetFromSectionStart + 2);
+        }
+
+        public override byte[] Assemble(Section section, uint absoluteInstructionPointer, Dictionary<string, Address> resolvedLabels)
+        {
+            byte opCode = 0x8B;
+            var address = GetAddressOrThrow(resolvedLabels, Source.Symbol);
+            return opCode.Encode(Source.EncodeAsRM(Destination, address));
+        }
+        public override uint GetSizeOnDisk() => 6;
+        public override uint GetVirtualSize() => 6;
+    }
+
+
     public class Mov_RegisterOffset_Register : X86Instruction, IRegisterOffset_Register
     {
         public RegisterOffset Destination { get; set; }
@@ -109,6 +140,39 @@ namespace Assembler.Core.Instructions
 
     }
 
+    public class Mov_Register_Address : X86Instruction, IRegister_Destination
+    {
+        public X86Register Destination { get; set; }
+        public string Address { get; set; }
+        public Mov_Register_Address(X86Register destination, string address)
+        {
+            Destination = destination;
+            Address = address;
+        }
+
+        public override string Emit()
+        {
+            return $"mov {Destination}, {Address}";
+        }
+
+        public override void AddRelocationEntry(BaseRelocationBlock baseRelocationBlock, ushort currentVirtualOffsetFromSectionStart)
+        {
+            baseRelocationBlock.AddEntry(currentVirtualOffsetFromSectionStart + 1);
+        }
+
+        public override byte[] Assemble(Section section, uint absoluteInstructionPointer, Dictionary<string, Address> resolvedLabels)
+        {
+            byte opCode = 0xB8;
+            opCode = opCode.ApplyRegister(Destination);
+            var address = GetAddressOrThrow(resolvedLabels, Address);
+            return opCode.Encode(address.VirtualAddress.ToBytes());
+        }
+        public override uint GetSizeOnDisk() => 5;
+        public override uint GetVirtualSize() => 5;
+
+    }
+
+
     public class Mov_RegisterOffset_Immediate : X86Instruction, IRegisterOffset_Immediate
     {
         public RegisterOffset Destination { get; set; }
@@ -131,6 +195,40 @@ namespace Assembler.Core.Instructions
             return opCode
                 .Encode(Destination.EncodeAsRM(X86Register.eax))
                 .Concat(ImmediateValue.ToBytes()).ToArray();
+        }
+
+        public override uint GetSizeOnDisk() => 5 + (uint)Destination.EncodeAsRM(X86Register.eax).Length;
+        public override uint GetVirtualSize() => 5 + (uint)Destination.EncodeAsRM(X86Register.eax).Length;
+    }
+
+    public class Mov_RegisterOffset_Address : X86Instruction, IRegisterOffset_Destination
+    {
+        public RegisterOffset Destination { get; set; }
+        public string Address { get; set; }
+        public Mov_RegisterOffset_Address(RegisterOffset destination, string address)
+        {
+            Destination = destination;
+            Address = address;
+        }
+
+        public override string Emit()
+        {
+            return $"mov {Destination}, {Address}";
+        }
+
+        public override void AddRelocationEntry(BaseRelocationBlock baseRelocationBlock, ushort currentVirtualOffsetFromSectionStart)
+        {
+            baseRelocationBlock.AddEntry(currentVirtualOffsetFromSectionStart + ((ushort)GetVirtualSize() - 4));
+        }
+
+        public override byte[] Assemble(Section section, uint absoluteInstructionPointer, Dictionary<string, Address> resolvedLabels)
+        {
+            byte opCode = 0xC7;
+            // here eax is opcode extension 0
+            var address = GetAddressOrThrow(resolvedLabels, Address);
+            return opCode
+                .Encode(Destination.EncodeAsRM(X86Register.eax))
+                .Concat(address.VirtualAddress.ToBytes()).ToArray();
         }
 
         public override uint GetSizeOnDisk() => 5 + (uint)Destination.EncodeAsRM(X86Register.eax).Length;
@@ -193,6 +291,41 @@ namespace Assembler.Core.Instructions
         public override void AddRelocationEntry(BaseRelocationBlock baseRelocationBlock, ushort currentVirtualOffsetFromSectionStart)
         {
             baseRelocationBlock.AddEntry(currentVirtualOffsetFromSectionStart + 2); 
+        }
+
+        public override uint GetSizeOnDisk() => 10;
+        public override uint GetVirtualSize() => 10;
+
+    }
+
+    public class Mov_SymbolOffset_Address : X86Instruction, ISymbolOffset_Destination
+    {
+        public SymbolOffset Destination { get; set; }
+        public string Address { get; set; }
+        public Mov_SymbolOffset_Address(SymbolOffset destination, string address)
+        {
+            Destination = destination;
+            Address = address;
+        }
+
+        public override string Emit()
+        {
+            return $"mov {Destination}, {Address}";
+        }
+
+        public override byte[] Assemble(Section section, uint absoluteInstructionPointer, Dictionary<string, Address> resolvedLabels)
+        {
+            var address = GetAddressOrThrow(resolvedLabels, Destination.Symbol);
+            byte opCode = 0xC7;
+            var sourceAddress = GetAddressOrThrow(resolvedLabels, Address);
+
+            return opCode.Encode(Destination.EncodeAsRM(address)).Concat(sourceAddress.VirtualAddress.ToBytes()).ToArray();
+        }
+
+        public override void AddRelocationEntry(BaseRelocationBlock baseRelocationBlock, ushort currentVirtualOffsetFromSectionStart)
+        {
+            baseRelocationBlock.AddEntry(currentVirtualOffsetFromSectionStart + 2);
+            baseRelocationBlock.AddEntry(currentVirtualOffsetFromSectionStart + 6);
         }
 
         public override uint GetSizeOnDisk() => 10;

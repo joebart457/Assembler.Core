@@ -101,4 +101,8 @@ public interface INonAltering_SymbolOffset_Destination: ISymbolOffset_Destinatio
 public interface IPush;
 public interface IPop;
 public interface ICall;
-public interface IJmp;
+public interface IRet;
+public interface IJmp
+{
+    public string Label { get; set; }
+}

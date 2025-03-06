@@ -270,13 +270,18 @@ public class X86AssemblyContext
     public Lea_Register_SymbolOffset Lea(X86Register destination, SymbolOffset source) => CurrentFunction.AddInstruction(new Lea_Register_SymbolOffset(destination, source));
 
     public Mov_Register_RegisterOffset Mov(X86Register destination, RegisterOffset source) => CurrentFunction.AddInstruction(new Mov_Register_RegisterOffset(destination, source));
+    public Mov_Register_SymbolOffset Mov(X86Register destination, SymbolOffset source) => CurrentFunction.AddInstruction(new Mov_Register_SymbolOffset(destination, source));
+    public Mov_Register_Address Mov(X86Register destination, string symbol) => CurrentFunction.AddInstruction(new Mov_Register_Address(destination, symbol));
     public Mov_RegisterOffset_Register Mov(RegisterOffset destination, X86Register source) => CurrentFunction.AddInstruction(new Mov_RegisterOffset_Register(destination, source));
     public Mov_RegisterOffset_Immediate Mov(RegisterOffset destination, int immediate) => CurrentFunction.AddInstruction(new Mov_RegisterOffset_Immediate(destination, immediate));
+    public Mov_RegisterOffset_Address Mov(RegisterOffset destination, string address) => CurrentFunction.AddInstruction(new Mov_RegisterOffset_Address(destination, address));
+
     public Mov_Register_Register Mov(X86Register destination, X86Register source) => CurrentFunction.AddInstruction(new Mov_Register_Register(destination, source));
     public Mov_Register_Immediate Mov(X86Register destination, int immediate) => CurrentFunction.AddInstruction(new Mov_Register_Immediate(destination, immediate));
 
     public Mov_SymbolOffset_Register Mov(SymbolOffset destination, X86Register source) => CurrentFunction.AddInstruction(new Mov_SymbolOffset_Register(destination, source));
     public Mov_SymbolOffset_Immediate Mov(SymbolOffset destination, int immediateValue) => CurrentFunction.AddInstruction(new Mov_SymbolOffset_Immediate(destination, immediateValue));
+    public Mov_SymbolOffset_Address Mov(SymbolOffset destination, string address) => CurrentFunction.AddInstruction(new Mov_SymbolOffset_Address(destination, address));
 
     public Mov_SymbolOffset_ByteRegister Mov(SymbolOffset destination, X86ByteRegister source) => CurrentFunction.AddInstruction(new Mov_SymbolOffset_ByteRegister(destination, source));
     public Mov_RegisterOffset_ByteRegister Mov(RegisterOffset destination, X86ByteRegister source) => CurrentFunction.AddInstruction(new Mov_RegisterOffset_ByteRegister(destination, source));

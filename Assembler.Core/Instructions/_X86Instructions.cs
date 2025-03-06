@@ -15,13 +15,17 @@ public static class X86Instructions
     public static Lea_Register_SymbolOffset Lea(X86Register destination, SymbolOffset source) => new Lea_Register_SymbolOffset(destination, source);
 
     public static Mov_Register_RegisterOffset Mov(X86Register destination, RegisterOffset source) => new Mov_Register_RegisterOffset(destination, source);
+    public static Mov_Register_SymbolOffset Mov(X86Register destination, SymbolOffset source) => new Mov_Register_SymbolOffset(destination, source);
+    public static Mov_Register_Address Mov(X86Register destination, string address) => new Mov_Register_Address(destination, address);
     public static Mov_RegisterOffset_Register Mov(RegisterOffset destination, X86Register source) => new Mov_RegisterOffset_Register(destination, source);
     public static Mov_RegisterOffset_Immediate Mov(RegisterOffset destination, int immediate) => new Mov_RegisterOffset_Immediate(destination, immediate);
+    public static Mov_RegisterOffset_Address Mov(RegisterOffset destination, string address) => new Mov_RegisterOffset_Address(destination, address);
     public static Mov_Register_Register Mov(X86Register destination, X86Register source) => new Mov_Register_Register(destination, source);
     public static Mov_Register_Immediate Mov(X86Register destination, int immediate) => new Mov_Register_Immediate(destination, immediate);
 
     public static Mov_SymbolOffset_Register Mov(SymbolOffset destination, X86Register source) => new Mov_SymbolOffset_Register(destination, source);
     public static Mov_SymbolOffset_Immediate Mov(SymbolOffset destination, int immediateValue) => new Mov_SymbolOffset_Immediate(destination, immediateValue);
+    public static Mov_SymbolOffset_Address Mov(SymbolOffset destination, string address) => new Mov_SymbolOffset_Address(destination, address);
 
     public static Mov_SymbolOffset_ByteRegister Mov(SymbolOffset destination, X86ByteRegister source) => new Mov_SymbolOffset_ByteRegister(destination, source);
     public static Mov_RegisterOffset_ByteRegister Mov(RegisterOffset destination, X86ByteRegister source) => new Mov_RegisterOffset_ByteRegister(destination, source);
