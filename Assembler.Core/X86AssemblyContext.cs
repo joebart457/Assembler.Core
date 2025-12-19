@@ -181,7 +181,7 @@ public class X86AssemblyContext
 
     public X86Function CurrentFunction => _currentFunctionTarget ?? throw new InvalidOperationException("CurrentFunction was null");
 
-    private string CreateUniqueLabel()
+    public string CreateUniqueLabel()
     {
         return $"!L{_uniqueLabelIndex++}";
     }
@@ -222,8 +222,8 @@ public class X86AssemblyContext
     {
         Push(X86Register.ebp);
         Mov(X86Register.ebp, X86Register.esp);
-        if (CurrentFunction.Parameters.Any())
-            Sub(X86Register.esp, CurrentFunction.Parameters.Sum(x => x.StackSize));
+        if (CurrentFunction.LocalData.Any())
+            Sub(X86Register.esp, CurrentFunction.LocalData.Sum(x => x.StackSize));
     }
 
     public void TeardownStackFrame()

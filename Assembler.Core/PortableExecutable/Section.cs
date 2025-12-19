@@ -128,7 +128,7 @@ namespace Assembler.Core.PortableExecutable
         public virtual string Emit()
         {
             var sb = new StringBuilder();
-            sb.AppendLine($"section {Encoding.UTF8.GetString(Name)}");
+            sb.AppendLine($"section {Encoding.UTF8.GetString(Name).Replace("\0", "")}");
             bool encounteredLabel = false;
             foreach (var instruction in DataInstructions)
             {
