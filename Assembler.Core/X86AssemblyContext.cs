@@ -137,11 +137,7 @@ public class X86AssemblyContext
 
     public RegisterOffset GetIdentifierOffset(string identifier)
     {
-        var foundParameterIndex = CurrentFunction.Parameters.FindIndex(x => x.Alias == identifier);
-        if (foundParameterIndex != -1) return new RegisterOffset(X86Register.ebp, 8 + (foundParameterIndex * 4));
-        var foundLocalVariableIndex = CurrentFunction.LocalData.FindIndex(x => x.Alias == identifier);
-        if (foundLocalVariableIndex != -1) return new RegisterOffset(X86Register.ebp, -4 - CurrentFunction.LocalData.Take(foundLocalVariableIndex + 1).Sum(x => x.StackSize));
-        throw new Exception($"local variable {identifier} does not exist");
+        return GetIdentifierOffset(identifier, out _);
     }
 
     public RegisterOffset GetIdentifierOffset(string identifier, out bool isParameterOffset)
@@ -151,7 +147,7 @@ public class X86AssemblyContext
         if (foundParameterIndex != -1) return new RegisterOffset(X86Register.ebp, 8 + (foundParameterIndex * 4));
         isParameterOffset = false;
         var foundLocalVariableIndex = CurrentFunction.LocalData.FindIndex(x => x.Alias == identifier);
-        if (foundLocalVariableIndex != -1) return new RegisterOffset(X86Register.ebp, -4 - CurrentFunction.LocalData.Take(foundLocalVariableIndex + 1).Sum(x => x.StackSize));
+        if (foundLocalVariableIndex != -1) return new RegisterOffset(X86Register.ebp, 0 - CurrentFunction.LocalData.Take(foundLocalVariableIndex + 1).Sum(x => x.StackSize));
         throw new Exception($"local variable {identifier} does not exist");
     }
 
